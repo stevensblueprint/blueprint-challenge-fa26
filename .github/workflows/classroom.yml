@@ -1,0 +1,74 @@
+name: Classroom CI
+
+on:
+  push:
+  workflow_dispatch:
+  repository_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Docker smoke tests
+        id: smoke_tests
+        continue-on-error: true
+        run: |
+          docker compose up -d --build
+          ./scripts/smoke-test.sh
+
+      - name: Set up Python
+        if: always()
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run backend tests
+        if: always()
+        id: backend_tests
+        continue-on-error: true
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          python -m pytest backend/tests -q
+
+      - name: Set up Node.js
+        if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Run frontend tests
+        if: always()
+        id: frontend_tests
+        continue-on-error: true
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test -- --runInBand
+
+      - name: Fail job if any test step failed
+        if: always()
+        env:
+          SMOKE_OUTCOME: ${{ steps.smoke_tests.outcome }}
+          BACKEND_OUTCOME: ${{ steps.backend_tests.outcome }}
+          FRONTEND_OUTCOME: ${{ steps.frontend_tests.outcome }}
+        run: |
+          echo "Smoke tests outcome: ${SMOKE_OUTCOME}"
+          echo "Backend tests outcome: ${BACKEND_OUTCOME}"
+          echo "Frontend tests outcome: ${FRONTEND_OUTCOME}"
+
+          if [ "${SMOKE_OUTCOME}" = "failure" ] || [ "${BACKEND_OUTCOME}" = "failure" ] || [ "${FRONTEND_OUTCOME}" = "failure" ]; then
+            echo "One or more test steps failed."
+            exit 1
+          fi
+
+      - name: Shutdown Docker services
+        if: always()
+        run: docker compose down -v
