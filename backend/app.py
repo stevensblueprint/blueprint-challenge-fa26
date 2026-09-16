@@ -5,22 +5,22 @@ from fastapi.middleware.cors import CORSMiddleware
 
 try:
     from .models import (
-        ReferralCreate,
-        ReferralResponse,
-        ResourceCategory,
-        ResourceCreate,
-        ResourceResponse,
+        CheckoutCreate,
+        CheckoutResponse,
+        BookGenre,
+        BookCreate,
+        BookResponse,
     )
 except ImportError:
     from models import (
-        ReferralCreate,
-        ReferralResponse,
-        ResourceCategory,
-        ResourceCreate,
-        ResourceResponse,
+        CheckoutCreate,
+        CheckoutResponse,
+        BookGenre,
+        BookCreate,
+        BookResponse,
     )
 
-app = FastAPI(title="CommunityBridge API Starter")
+app = FastAPI(title="LibraryConnect API Starter")
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,37 +36,37 @@ def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/resources", response_model=ResourceResponse)
-def create_resource(payload: ResourceCreate) -> ResourceResponse:
+@app.post("/books", response_model=BookResponse)
+def create_book(payload: BookCreate) -> BookResponse:
     _ = payload
-    # TODO: Implement persistence and return the newly created resource.
-    raise HTTPException(status_code=501, detail="TODO: implement POST /resources")
+    # TODO: Implement persistence and return the newly created book.
+    raise HTTPException(status_code=501, detail="TODO: implement POST /books")
 
 
-@app.get("/resources", response_model=list[ResourceResponse])
-def list_resources(q: str | None = None, category: ResourceCategory | None = None) -> list[ResourceResponse]:
+@app.get("/books", response_model=list[BookResponse])
+def list_books(q: str | None = None, genre: BookGenre | None = None) -> list[BookResponse]:
     _ = q
-    _ = category
-    # TODO: Implement search by name (q) and filter by category.
-    raise HTTPException(status_code=501, detail="TODO: implement GET /resources")
+    _ = genre
+    # TODO: Implement search by title (q) and filter by genre.
+    raise HTTPException(status_code=501, detail="TODO: implement GET /books")
 
 
-@app.get("/resources/{resource_id}", response_model=ResourceResponse)
-def get_resource(resource_id: int) -> ResourceResponse:
-    _ = resource_id
-    # TODO: Return a single resource by id, or 404 if not found.
-    raise HTTPException(status_code=501, detail="TODO: implement GET /resources/{id}")
+@app.get("/books/{book_id}", response_model=BookResponse)
+def get_book(book_id: int) -> BookResponse:
+    _ = book_id
+    # TODO: Return a single book by id, or 404 if not found.
+    raise HTTPException(status_code=501, detail="TODO: implement GET /books/{id}")
 
 
-@app.post("/referrals", response_model=ReferralResponse)
-def create_referral(payload: ReferralCreate) -> ReferralResponse:
+@app.post("/checkouts", response_model=CheckoutResponse)
+def create_checkout(payload: CheckoutCreate) -> CheckoutResponse:
     _ = payload
-    # TODO: Validate resource exists, then create and return referral.
-    raise HTTPException(status_code=501, detail="TODO: implement POST /referrals")
+    # TODO: Validate book exists, then create and return checkout.
+    raise HTTPException(status_code=501, detail="TODO: implement POST /checkouts")
 
 
-@app.get("/resources/{resource_id}/referrals", response_model=list[ReferralResponse])
-def list_resource_referrals(resource_id: int) -> list[ReferralResponse]:
-    _ = resource_id
-    # TODO: Return referrals associated with the given resource.
-    raise HTTPException(status_code=501, detail="TODO: implement GET /resources/{id}/referrals")
+@app.get("/books/{book_id}/checkouts", response_model=list[CheckoutResponse])
+def list_book_checkouts(book_id: int) -> list[CheckoutResponse]:
+    _ = book_id
+    # TODO: Return checkouts associated with the given book.
+    raise HTTPException(status_code=501, detail="TODO: implement GET /books/{id}/checkouts")

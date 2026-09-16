@@ -1,9 +1,9 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: communitybridge-db
+    container_name: libraryconnect-db
     environment:
-      POSTGRES_DB: communitybridge
+      POSTGRES_DB: libraryconnect
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d communitybridge"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d libraryconnect"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -19,9 +19,9 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: communitybridge-backend
+    container_name: libraryconnect-backend
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/communitybridge
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/libraryconnect
     ports:
       - "8000:8000"
     depends_on:
@@ -31,7 +31,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: communitybridge-frontend
+    container_name: libraryconnect-frontend
     environment:
       VITE_API_BASE_URL: http://localhost:8000
     ports:

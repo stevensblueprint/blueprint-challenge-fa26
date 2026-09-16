@@ -1,135 +1,135 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 
-import ReferralForm from './ReferralForm'
-import ResourceDetail from './ResourceDetail'
-import ResourceForm from './ResourceForm'
-import ResourceList from './ResourceList'
+import CheckoutForm from './CheckoutForm'
+import BookDetail from './BookDetail'
+import BookForm from './BookForm'
+import BookList from './BookList'
 
 describe('component behavior contracts', () => {
-  test('ResourceList renders resources, supports search/filter, and selection callback', async () => {
+  test('BookList renders books, supports search/filter, and selection callback', async () => {
     const user = userEvent.setup()
     const onSearchChange = jest.fn()
-    const onCategoryChange = jest.fn()
-    const onSelectResource = jest.fn()
+    const onGenreChange = jest.fn()
+    const onSelectBook = jest.fn()
 
     render(
-      <ResourceList
-        resources={[
+      <BookList
+        books={[
           {
             id: 1,
-            name: 'City Food Bank',
-            category: 'Food',
-            description: 'Food support',
-            address: '10 Main St',
-            email: 'food@example.org',
-            phone: '555-0101',
+            title: 'The Hobbit',
+            genre: 'Fiction',
+            description: 'A hobbit goes on an adventure',
+            author: 'J.R.R. Tolkien',
+            publisher_email: 'contact@allenandunwin.example.org',
+            shelf_location: 'FIC-TOL-001',
           },
         ]}
         search=""
-        categoryFilter="All"
+        genreFilter="All"
         onSearchChange={onSearchChange}
-        onCategoryChange={onCategoryChange}
-        onSelectResource={onSelectResource}
-        categories={['Food', 'Healthcare']}
+        onGenreChange={onGenreChange}
+        onSelectBook={onSelectBook}
+        genres={['Fiction', 'Reference']}
       />,
     )
 
-    expect(screen.getByRole('heading', { name: /resources/i })).toBeInTheDocument()
-    expect(screen.getByText('City Food Bank')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /books/i })).toBeInTheDocument()
+    expect(screen.getByText('The Hobbit')).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText(/search/i), 'food')
-    expect(onSearchChange).toHaveBeenLastCalledWith('food')
+    await user.type(screen.getByLabelText(/search/i), 'hobbit')
+    expect(onSearchChange).toHaveBeenLastCalledWith('hobbit')
 
-    await user.selectOptions(screen.getByLabelText(/category/i), 'Healthcare')
-    expect(onCategoryChange).toHaveBeenLastCalledWith('Healthcare')
+    await user.selectOptions(screen.getByLabelText(/genre/i), 'Reference')
+    expect(onGenreChange).toHaveBeenLastCalledWith('Reference')
 
     await user.click(screen.getByRole('button', { name: /view details/i }))
-    expect(onSelectResource).toHaveBeenCalledWith(1)
+    expect(onSelectBook).toHaveBeenCalledWith(1)
   })
 
-  test('ResourceForm submits edited field values', async () => {
+  test('BookForm submits edited field values', async () => {
     const user = userEvent.setup()
     const onChange = jest.fn()
     const onSubmit = jest.fn()
 
     render(
-      <ResourceForm
+      <BookForm
         values={{
-          name: '',
-          category: 'Food',
+          title: '',
+          genre: 'Fiction',
           description: '',
-          address: '',
-          email: '',
-          phone: '',
+          author: '',
+          publisher_email: '',
+          shelf_location: '',
         }}
-        categories={['Food', 'Employment']}
+        genres={['Fiction', 'Children']}
         onChange={onChange}
         onSubmit={onSubmit}
       />,
     )
 
-    await user.type(screen.getByLabelText(/^name$/i), 'Future Jobs Center')
+    await user.type(screen.getByLabelText(/^title$/i), 'Where the Wild Things Are')
     expect(onChange).toHaveBeenCalled()
 
-    await user.selectOptions(screen.getByLabelText(/^category$/i), 'Employment')
+    await user.selectOptions(screen.getByLabelText(/^genre$/i), 'Children')
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        category: 'Employment',
+        genre: 'Children',
       }),
     )
 
-    await user.click(screen.getByRole('button', { name: /create resource/i }))
+    await user.click(screen.getByRole('button', { name: /create book/i }))
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 
-  test('ResourceDetail shows selected resource data and related referrals', () => {
+  test('BookDetail shows selected book data and related checkouts', () => {
     render(
-      <ResourceDetail
-        resource={{
+      <BookDetail
+        book={{
           id: 1,
-          name: 'City Food Bank',
-          category: 'Food',
-          description: 'Food support',
-          address: '10 Main St',
-          email: 'food@example.org',
-          phone: '555-0101',
+          title: 'The Hobbit',
+          genre: 'Fiction',
+          description: 'A hobbit goes on an adventure',
+          author: 'J.R.R. Tolkien',
+          publisher_email: 'contact@allenandunwin.example.org',
+          shelf_location: 'FIC-TOL-001',
         }}
-        referrals={[
+        checkouts={[
           {
             id: 12,
-            family_name: 'Lopez Family',
-            resource_id: 1,
+            patron_name: 'Priya Nair',
+            book_id: 1,
             date: '2026-02-20',
-            notes: 'Follow up in 1 week',
+            notes: 'Due back in 3 weeks',
           },
         ]}
       />,
     )
 
-    expect(screen.getByText('City Food Bank')).toBeInTheDocument()
-    expect(screen.getByText(/food support/i)).toBeInTheDocument()
-    expect(screen.getByText(/lopez family/i)).toBeInTheDocument()
-    expect(screen.getByText(/follow up in 1 week/i)).toBeInTheDocument()
+    expect(screen.getByText('The Hobbit')).toBeInTheDocument()
+    expect(screen.getByText(/a hobbit goes on an adventure/i)).toBeInTheDocument()
+    expect(screen.getByText(/priya nair/i)).toBeInTheDocument()
+    expect(screen.getByText(/due back in 3 weeks/i)).toBeInTheDocument()
   })
 
-  test('ReferralForm captures user inputs and submits', async () => {
+  test('CheckoutForm captures user inputs and submits', async () => {
     const user = userEvent.setup()
     const onChange = jest.fn()
     const onSubmit = jest.fn()
 
     render(
-      <ReferralForm
-        values={{ family_name: '', resource_id: '', date: '2026-02-21', notes: '' }}
-        resources={[
+      <CheckoutForm
+        values={{ patron_name: '', book_id: '', date: '2026-02-21', notes: '' }}
+        books={[
           {
             id: 1,
-            name: 'City Food Bank',
-            category: 'Food',
-            description: 'Food support',
-            address: '10 Main St',
-            email: 'food@example.org',
-            phone: '555-0101',
+            title: 'The Hobbit',
+            genre: 'Fiction',
+            description: 'A hobbit goes on an adventure',
+            author: 'J.R.R. Tolkien',
+            publisher_email: 'contact@allenandunwin.example.org',
+            shelf_location: 'FIC-TOL-001',
           },
         ]}
         onChange={onChange}
@@ -137,17 +137,17 @@ describe('component behavior contracts', () => {
       />,
     )
 
-    await user.type(screen.getByLabelText(/family name/i), 'Garcia Family')
+    await user.type(screen.getByLabelText(/patron name/i), 'Marcus Webb')
     expect(onChange).toHaveBeenCalled()
 
-    await user.selectOptions(screen.getByLabelText(/^resource$/i), '1')
+    await user.selectOptions(screen.getByLabelText(/^book$/i), '1')
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        resource_id: '1',
+        book_id: '1',
       }),
     )
 
-    await user.click(screen.getByRole('button', { name: /create referral/i }))
+    await user.click(screen.getByRole('button', { name: /create checkout/i }))
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 })

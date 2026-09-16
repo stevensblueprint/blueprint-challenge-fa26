@@ -1,9 +1,9 @@
 import {
-  createReferral,
-  createResource,
-  getResource,
-  listResourceReferrals,
-  listResources,
+  createCheckout,
+  createBook,
+  getBook,
+  listBookCheckouts,
+  listBooks,
 } from './api'
 
 describe('api contract', () => {
@@ -14,66 +14,66 @@ describe('api contract', () => {
     ;(globalThis as unknown as { fetch: typeof fetch }).fetch = fetchMock
   })
 
-  test('listResources calls GET /resources with q and category query params', async () => {
-    const resources = [
+  test('listBooks calls GET /books with q and genre query params', async () => {
+    const books = [
       {
         id: 1,
-        name: 'City Food Bank',
-        category: 'Food',
-        description: 'Food support',
-        address: '10 Main St',
-        email: 'food@example.org',
-        phone: '555-0101',
+        title: 'The Hobbit',
+        genre: 'Fiction',
+        description: 'A hobbit goes on an adventure',
+        author: 'J.R.R. Tolkien',
+        publisher_email: 'contact@allenandunwin.example.org',
+        shelf_location: 'FIC-TOL-001',
       },
     ]
 
     fetchMock.mockResolvedValue({
       ok: true,
-      json: async () => resources,
+      json: async () => books,
     } as Response)
 
-    const result = await listResources({ q: 'food', category: 'Food' })
+    const result = await listBooks({ q: 'hobbit', genre: 'Fiction' })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/resources?q=food&category=Food',
+      'http://localhost:8000/books?q=hobbit&genre=Fiction',
       expect.objectContaining({ method: 'GET' }),
     )
-    expect(result).toEqual(resources)
+    expect(result).toEqual(books)
   })
 
-  test('getResource calls GET /resources/{id} and returns parsed payload', async () => {
-    const resource = {
+  test('getBook calls GET /books/{id} and returns parsed payload', async () => {
+    const book = {
       id: 7,
-      name: 'North Clinic',
-      category: 'Healthcare' as const,
-      description: 'Clinic services',
-      address: '200 Health Ave',
-      email: 'clinic@example.org',
-      phone: '555-0202',
+      title: 'The Elements of Style',
+      genre: 'Reference' as const,
+      description: 'Guide to writing well',
+      author: 'William Strunk Jr.',
+      publisher_email: 'contact@pearson.example.org',
+      shelf_location: 'REF-STR-014',
     }
 
     fetchMock.mockResolvedValue({
       ok: true,
-      json: async () => resource,
+      json: async () => book,
     } as Response)
 
-    const result = await getResource(7)
+    const result = await getBook(7)
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/resources/7',
+      'http://localhost:8000/books/7',
       expect.objectContaining({ method: 'GET' }),
     )
-    expect(result).toEqual(resource)
+    expect(result).toEqual(book)
   })
 
-  test('createResource calls POST /resources with JSON payload', async () => {
+  test('createBook calls POST /books with JSON payload', async () => {
     const payload = {
-      name: 'Future Jobs Center',
-      category: 'Employment' as const,
-      description: 'Job training',
-      address: '300 Career Rd',
-      email: 'jobs@example.org',
-      phone: '555-0303',
+      title: 'Where the Wild Things Are',
+      genre: 'Children' as const,
+      description: 'A boy sails to an island of monsters',
+      author: 'Maurice Sendak',
+      publisher_email: 'contact@harpercollins.example.org',
+      shelf_location: 'CHI-SEN-002',
     }
 
     fetchMock.mockResolvedValue({
@@ -81,10 +81,10 @@ describe('api contract', () => {
       json: async () => ({ id: 3, ...payload }),
     } as Response)
 
-    const created = await createResource(payload)
+    const created = await createBook(payload)
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/resources',
+      'http://localhost:8000/books',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
@@ -94,54 +94,54 @@ describe('api contract', () => {
     expect(created).toEqual({ id: 3, ...payload })
   })
 
-  test('listResourceReferrals calls GET /resources/{id}/referrals', async () => {
-    const referrals = [
+  test('listBookCheckouts calls GET /books/{id}/checkouts', async () => {
+    const checkouts = [
       {
         id: 11,
-        family_name: 'Garcia Family',
-        resource_id: 1,
+        patron_name: 'Priya Nair',
+        book_id: 1,
         date: '2026-02-15',
-        notes: 'Needs weekly pickup',
+        notes: 'Due back in 3 weeks',
       },
     ]
 
     fetchMock.mockResolvedValue({
       ok: true,
-      json: async () => referrals,
+      json: async () => checkouts,
     } as Response)
 
-    const result = await listResourceReferrals(1)
+    const result = await listBookCheckouts(1)
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/resources/1/referrals',
+      'http://localhost:8000/books/1/checkouts',
       expect.objectContaining({ method: 'GET' }),
     )
-    expect(result).toEqual(referrals)
+    expect(result).toEqual(checkouts)
   })
 
-  test('createReferral calls POST /referrals with JSON payload', async () => {
+  test('createCheckout calls POST /checkouts with JSON payload', async () => {
     const payload = {
-      family_name: 'Lopez Family',
-      resource_id: '1',
+      patron_name: 'Marcus Webb',
+      book_id: '1',
       date: '2026-02-20',
-      notes: 'Follow up in 1 week',
+      notes: 'Renewed once already',
     }
 
     fetchMock.mockResolvedValue({
       ok: true,
-      json: async () => ({ id: 12, ...payload, resource_id: 1 }),
+      json: async () => ({ id: 12, ...payload, book_id: 1 }),
     } as Response)
 
-    const created = await createReferral(payload)
+    const created = await createCheckout(payload)
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/referrals',
+      'http://localhost:8000/checkouts',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload),
       }),
     )
-    expect(created).toEqual({ id: 12, ...payload, resource_id: 1 })
+    expect(created).toEqual({ id: 12, ...payload, book_id: 1 })
   })
 })

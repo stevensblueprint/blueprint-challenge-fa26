@@ -1,162 +1,170 @@
-## CommunityBridge Resource Hub
+# LibraryConnect Resource Hub
 
-### Background  
+## Background
 
-CommunityBridge is a nonprofit organization that supports low-income families by connecting them with essential local services such as food banks, shelters, job training programs, tutoring, and healthcare clinics.
+LibraryConnect is a public library system that helps patrons discover books and manages the lending process across its branches.
 
-Currently, staff track resources and referrals using spreadsheets, email, and paper forms. This process is inefficient and makes it difficult to:
+Currently, staff track the catalog and checkouts using spreadsheets, email, and paper forms. This process is inefficient and makes it difficult to:
 
-- Keep resource information up to date  
-- Quickly search for relevant services  
-- Track which families were referred to which programs  
-- Understand usage and demand across services  
+- Keep catalog information up to date
+- Quickly search for relevant books
+- Track which patrons checked out which books
+- Understand usage and demand across the collection
 
-CommunityBridge has asked Blueprint to design and build a simple internal web application that centralizes resource information and referral tracking in one place.
+LibraryConnect has asked Blueprint to design and build a simple internal web application that centralizes catalog information and checkout tracking in one place.
 
-The goal is to create a lightweight tool that staff can use daily to manage community resources and record referrals.
+The goal is to create a lightweight tool that staff can use daily to manage the book catalog and record checkouts.
 
 ---
 
-# Product Goal  
+## Product Goal
 
-Build a full-stack web application that allows nonprofit staff to:
+Build a full-stack web application that allows library staff to:
 
-- Manage community resources  
-- Search and filter available services  
-- Record and view referrals made to families  
+- Manage the book catalog
+- Search and filter available books
+- Record and view checkouts made to patrons
 
 The application should include:
 
-- React frontend  
-- FastAPI backend  
-- PostgreSQL database  
+- React frontend
+- FastAPI backend
+- PostgreSQL database
 
 ---
 
-# Feature — Resource Management  
+## Feature — Book Management
 
-## Context  
+### Context
 
-CommunityBridge maintains a directory of community programs and services. Staff frequently need to add new resources, update existing ones, and browse available services when assisting families.
+LibraryConnect maintains a catalog of books across its branches. Staff frequently need to add new books, update existing ones, and browse the catalog when assisting patrons.
 
-The system should allow staff to store structured information about each resource and view it later.
+The system should allow staff to store structured information about each book and view it later.
 
-## Requirements  
+### Requirements
 
 The system must allow staff to:
 
-- Create a new resource  
-- View a list of all resources  
-- View details of a single resource  
+- Create a new book
+- View a list of all books
+- View details of a single book
 
-Each resource must include:
+Each book must include:
 
-- Name  
-- Category (Food, Housing, Education, Healthcare, Employment, Other)  
-- Description  
-- Address  
-- Contact email  
-- Phone number  
+| Field | Type |
+|---|---|
+| Title | string |
+| Genre | enum (`Fiction`, `Non-Fiction`, `Children`, `Reference`, `Periodical`, `Other`) |
+| Description | text |
+| Author | string |
+| Publisher email | email |
+| Shelf location / call number | string |
 
 ---
 
-# Feature — Search and Filtering  
+## Feature — Search and Filtering
 
-## Context  
+### Context
 
-When working with families, staff often need to quickly find relevant services (for example: food banks in the area or education programs). Searching manually through spreadsheets is slow and error-prone.
+When working with patrons, staff often need to quickly find relevant books (for example: children's books or reference material). Searching manually through spreadsheets is slow and error-prone.
 
-The system should support quick discovery of resources through search and category filtering.
+The system should support quick discovery of books through search and genre filtering.
 
-## Requirements  
+### Requirements
 
 The system must allow staff to:
 
-- Search resources by name  
-- Filter resources by category  
+- Search books by title
+- Filter books by genre
 
-Search and filters should apply to the resource list view.
+Search and filters should apply to the book list view.
 
 ---
 
-# Feature — Referral Tracking  
+## Feature — Checkout Tracking
 
-## Context  
+### Context
 
-When a staff member connects a family with a service, they record a referral. Tracking referrals helps CommunityBridge understand which resources are most used and ensures follow-up with families.
+When a patron borrows a book, staff record a checkout. Tracking checkouts helps LibraryConnect understand which books are most popular and ensures follow-up on overdue returns.
 
-Currently, referrals are stored in notes or emails and are difficult to track historically.
+Currently, checkouts are tracked in notes or emails and are difficult to track historically.
 
-The system should allow staff to record referrals linked to specific resources.
+The system should allow staff to record checkouts linked to specific books.
 
-## Requirements  
+### Requirements
 
 The system must allow staff to:
 
-- Create a referral to a resource  
-- View referrals associated with a resource  
+- Create a checkout for a book
+- View checkouts associated with a book
 
-Each referral must include:
+Each checkout must include:
 
-- Family name  
-- Resource (selected from existing resources)  
-- Date  
-- Notes  
+| Field | Type |
+|---|---|
+| Patron name | string |
+| Book | foreign key → Book |
+| Date | date |
+| Notes | text |
 
 ---
 
-# Frontend Requirements
+## Frontend Requirements
 
-## Context  
+### Context
 
-CommunityBridge staff are not technical users. The interface should be simple, clear, and easy to navigate so staff can quickly access resource information and record referrals during client interactions.
+LibraryConnect staff are not technical users. The interface should be simple, clear, and easy to navigate so staff can quickly access catalog information and record checkouts during patron interactions.
 
-## Requirements  
+### Requirements
 
 The frontend must include:
 
-- Resource list page  
-- Resource creation form  
-- Resource detail page  
-- Referral creation form  
+- Book list page
+- Book creation form
+- Book detail page
+- Checkout creation form
 
 The frontend must:
 
-- Communicate with the FastAPI backend via API calls  
-- Display data from the database  
-- Submit forms to create resources and referrals  
+- Communicate with the FastAPI backend via API calls
+- Display data from the database
+- Submit forms to create books and checkouts
 
 ---
 
-# Backend Requirements
+## Backend Requirements
 
-## Context  
+### Context
 
-The backend will serve as the system of record for resources and referrals. It must expose a clean API that the frontend can use and ensure data validation and persistence.
+The backend will serve as the system of record for books and checkouts. It must expose a clean API that the frontend can use and ensure data validation and persistence.
 
-## Requirements  
+### Requirements
 
 The backend must:
 
-- Provide REST API endpoints for resources and referrals  
-- Validate request data  
-- Store and retrieve data from PostgreSQL  
+- Provide REST API endpoints for books and checkouts
+- Validate request data
+- Store and retrieve data from PostgreSQL
 
-Expected endpoints include:
+### Expected Endpoints
 
-- POST /resources  
-- GET /resources  
-- GET /resources/{id}  
-- POST /referrals  
-- GET /resources/{id}/referrals  
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/books` | Create a new book |
+| `GET` | `/books` | List all books (supports search & genre filter) |
+| `GET` | `/books/{id}` | Get details of a single book |
+| `POST` | `/checkouts` | Create a checkout |
+| `GET` | `/books/{id}/checkouts` | List checkouts for a book |
+
+---
 
 ## Starter Implementation Included
 
 This repository now includes a starter full-stack implementation with:
 
-- `frontend/`: React + Vite UI for resource list/search/filter, resource creation, resource detail, and referral creation
-- `backend/`: FastAPI REST API with PostgreSQL persistence for resources and referrals
-- `docker-compose.yml`: PostgreSQL + backend + frontend services
+- `frontend/` React + Vite UI for book list/search/filter, book creation, book detail, and checkout creation
+- `backend/` FastAPI REST API with PostgreSQL persistence for books and checkouts
+- `docker-compose.yml` PostgreSQL + backend + frontend services
 
 ### Run with Docker
 
@@ -168,10 +176,10 @@ docker compose up --build
 
 Then open:
 
-- Frontend: http://localhost:5173
-- Backend API docs: http://localhost:8000/docs
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### Smoke tests with curl
+### Smoke Tests with curl
 
 After `docker compose up --build` is running in another terminal:
 
@@ -185,9 +193,10 @@ What it verifies:
 - `GET http://localhost:8000/docs` is reachable
 - `GET http://localhost:5173` serves HTML from the frontend
 
-### Backend tests (pytest)
+### Backend Tests (pytest)
 
 From the repository root, install backend test dependencies:
+
 ```bash
 cd backend
 python3 -m venv .venv
@@ -197,6 +206,7 @@ source .venv/bin/activate
 ```bash
 python3 -m pip install -r requirements.txt
 ```
+
 Run all backend tests:
 
 ```bash
@@ -204,7 +214,7 @@ cd ..
 python3 -m pytest -q backend/tests
 ```
 
-### Frontend tests (Jest)
+### Frontend Tests (Jest)
 
 From the repository root, install frontend dependencies:
 
@@ -219,14 +229,10 @@ Run all frontend tests:
 npm test -- --runInBand
 ```
 
-### Stop services
+### Stop Services
 
 ```bash
 docker compose down
 ```
 
-To also remove database data volume:
-
-```bash
-docker compose down -v
-```
+---

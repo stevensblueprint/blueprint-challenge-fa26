@@ -9,31 +9,31 @@ except ImportError:
     from database import Base
 
 
-class Resource(Base):
-    __tablename__ = "resources"
+class Book(Base):
+    __tablename__ = "books"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
-    category: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    genre: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    address: Mapped[str] = mapped_column(String(255), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), nullable=False)
-    phone: Mapped[str] = mapped_column(String(64), nullable=False)
+    author: Mapped[str] = mapped_column(String(255), nullable=False)
+    publisher_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    shelf_location: Mapped[str] = mapped_column(String(64), nullable=False)
 
-    referrals: Mapped[list["Referral"]] = relationship(
-        "Referral", back_populates="resource", cascade="all, delete-orphan"
+    checkouts: Mapped[list["Checkout"]] = relationship(
+        "Checkout", back_populates="book", cascade="all, delete-orphan"
     )
 
 
-class Referral(Base):
-    __tablename__ = "referrals"
+class Checkout(Base):
+    __tablename__ = "checkouts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    family_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    resource_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("resources.id"), index=True, nullable=False
+    patron_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    book_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("books.id"), index=True, nullable=False
     )
     date: Mapped[Date] = mapped_column(Date, nullable=False)
     notes: Mapped[str] = mapped_column(Text, nullable=False)
 
-    resource: Mapped[Resource] = relationship("Resource", back_populates="referrals")
+    book: Mapped[Book] = relationship("Book", back_populates="checkouts")

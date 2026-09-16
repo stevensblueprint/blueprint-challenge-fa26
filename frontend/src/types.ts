@@ -1,43 +1,37 @@
-export type Category =
-  | 'Food'
-  | 'Housing'
-  | 'Education'
-  | 'Healthcare'
-  | 'Employment'
-  | 'Other'
+export type Genre = 'Fiction' | 'Non-Fiction' | 'Children' | 'Reference' | 'Periodical' | 'Other'
 
-export type Resource = {
+export type Book = {
   id: number
-  name: string
-  category: Category
+  title: string
+  genre: Genre
   description: string
-  address: string
-  email: string
-  phone: string
+  author: string
+  publisher_email: string
+  shelf_location: string
 }
 
-export type Referral = {
+export type BookFormValues = {
+  title: string
+  genre: Genre
+  description: string
+  author: string
+  publisher_email: string
+  shelf_location: string
+}
+
+export type Checkout = {
   id: number
-  family_name: string
-  resource_id: number
+  patron_name: string
+  book_id: number
   date: string
   notes: string
 }
 
-export type ResourceFormValues = Omit<Resource, 'id'>
-
-export type ReferralFormValues = {
-  family_name: string
-  resource_id: string
+export type CheckoutFormValues = {
+  patron_name: string
+  book_id: string
   date: string
   notes: string
 }
 
-export const CATEGORIES: Category[] = [
-  'Food',
-  'Housing',
-  'Education',
-  'Healthcare',
-  'Employment',
-  'Other',
-]
+export const GENRES: Genre[] = ['Fiction', 'Non-Fiction', 'Children', 'Reference', 'Periodical', 'Other']

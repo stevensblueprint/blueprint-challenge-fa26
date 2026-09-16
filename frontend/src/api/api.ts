@@ -1,53 +1,53 @@
 import type {
-  Category,
-  Referral,
-  ReferralFormValues,
-  Resource,
-  ResourceFormValues,
+  Genre,
+  Checkout,
+  CheckoutFormValues,
+  Book,
+  BookFormValues,
 } from "../types";
 
 const API_BASE_URL = "http://localhost:8000";
 
-export async function listResources(_params?: {
+export async function listBooks(_params?: {
   q?: string;
-  category?: Category | "All";
-}): Promise<Resource[]> {
+  genre?: Genre | "All";
+}): Promise<Book[]> {
   void _params;
   void API_BASE_URL;
-  // TODO: Call GET /resources with optional q/category query params.
-  throw new Error("TODO: implement listResources in src/api/api.ts");
+  // TODO: Call GET /books with optional q/genre query params.
+  throw new Error("TODO: implement listBooks in src/api/api.ts");
 }
 
-export async function getResource(_resourceId: number): Promise<Resource> {
-  void _resourceId;
+export async function getBook(_bookId: number): Promise<Book> {
+  void _bookId;
   void API_BASE_URL;
-  // TODO: Call GET /resources/{id}.
-  throw new Error("TODO: implement getResource in src/api/api.ts");
+  // TODO: Call GET /books/{id}.
+  throw new Error("TODO: implement getBook in src/api/api.ts");
 }
 
-export async function createResource(
-  _payload: ResourceFormValues,
-): Promise<Resource> {
+export async function createBook(
+  _payload: BookFormValues,
+): Promise<Book> {
   void _payload;
   void API_BASE_URL;
-  // TODO: Call POST /resources.
-  throw new Error("TODO: implement createResource in src/api/api.ts");
+  // TODO: Call POST /books.
+  throw new Error("TODO: implement createBook in src/api/api.ts");
 }
 
-export async function listResourceReferrals(
-  _resourceId: number,
-): Promise<Referral[]> {
-  void _resourceId;
+export async function listBookCheckouts(
+  _bookId: number,
+): Promise<Checkout[]> {
+  void _bookId;
   void API_BASE_URL;
-  // TODO: Call GET /resources/{id}/referrals.
-  throw new Error("TODO: implement listResourceReferrals in src/api/api.ts");
+  // TODO: Call GET /books/{id}/checkouts.
+  throw new Error("TODO: implement listBookCheckouts in src/api/api.ts");
 }
 
-export async function createReferral(
-  _payload: ReferralFormValues,
-): Promise<Referral> {
+export async function createCheckout(
+  _payload: CheckoutFormValues,
+): Promise<Checkout> {
   void _payload;
   void API_BASE_URL;
-  // TODO: Call POST /referrals.
-  throw new Error("TODO: implement createReferral in src/api/api.ts");
+  // TODO: Call POST /checkouts.
+  throw new Error("TODO: implement createCheckout in src/api/api.ts");
 }

@@ -6,34 +6,34 @@ from datetime import date
 from pydantic import BaseModel, EmailStr
 
 
-class ResourceCategory(str, enum.Enum):
-    FOOD = "Food"
-    HOUSING = "Housing"
-    EDUCATION = "Education"
-    HEALTHCARE = "Healthcare"
-    EMPLOYMENT = "Employment"
+class BookGenre(str, enum.Enum):
+    FICTION = "Fiction"
+    NON_FICTION = "Non-Fiction"
+    CHILDREN = "Children"
+    REFERENCE = "Reference"
+    PERIODICAL = "Periodical"
     OTHER = "Other"
 
 
-class ResourceCreate(BaseModel):
-    name: str
-    category: ResourceCategory
+class BookCreate(BaseModel):
+    title: str
+    genre: BookGenre
     description: str
-    address: str
-    email: EmailStr
-    phone: str
+    author: str
+    publisher_email: EmailStr
+    shelf_location: str
 
 
-class ResourceResponse(ResourceCreate):
+class BookResponse(BookCreate):
     id: int
 
 
-class ReferralCreate(BaseModel):
-    family_name: str
-    resource_id: int
+class CheckoutCreate(BaseModel):
+    patron_name: str
+    book_id: int
     date: date
     notes: str
 
 
-class ReferralResponse(ReferralCreate):
+class CheckoutResponse(CheckoutCreate):
     id: int

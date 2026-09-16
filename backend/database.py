@@ -5,7 +5,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./communitybridge.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./libraryconnect.db")
 
 connect_args: dict[str, object] = {}
 if DATABASE_URL.startswith("sqlite"):
