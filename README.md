@@ -1,5 +1,11 @@
 # LibraryConnect Resource Hub
 
+## Welcome to the Fall 2026 Developer Challenge!
+
+To complete challenge, please fork this repository, create a branch for your changes, and open a pull request against `main` when you're ready to submit your challenge.
+
+Details below, and good luck!
+
 ## Background
 
 LibraryConnect is a public library system that helps patrons discover books and manages the lending process across its branches.
