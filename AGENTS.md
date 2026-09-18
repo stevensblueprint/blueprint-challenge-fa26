@@ -17,9 +17,7 @@ On every user message, before research, commands, code changes, or an answer:
 2. Append the user's exact challenge-related message, including follow-ups,
    corrections, questions, and requests that result in no code changes.
 3. Record your tool/assistant name, exact model identifier or full model name
-   including its version and variant, and a timestamp if available. For example,
-   use `gpt-5.6-luna` (GPT-5.6 Luna) or `gpt-6-astra` (GPT-6 Astra), not only
-   `GPT-5`, `GPT-6`, or `Codex`. Record where the model identity came from
+   including its version and variant, and a timestamp if available. Record where the model identity came from
    (runtime metadata, the selected model shown in the UI, or the user). Use
    `unknown` when the exact model cannot be verified; a known family name may
    be noted separately but is not an exact model identifier. Do not infer a
