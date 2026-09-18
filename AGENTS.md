@@ -4,11 +4,6 @@ AI assistance is allowed for this LibraryConnect challenge. Keep an accurate,
 reviewable record of your assistance in `AI_USAGE.md` at the repository root.
 The applicant remains responsible for reviewing the record and the submitted code.
 
-The distributed starter's `AI_USAGE.md` must remain a blank applicant template.
-For maintainer changes to the starter, document assistance in the PR instead of
-filling that template. The logging instructions below apply to applicant work;
-append real entries under the template's `Entries` heading.
-
 ## Record every prompt before working
 
 On every user message, before research, commands, code changes, or an answer:
@@ -17,7 +12,8 @@ On every user message, before research, commands, code changes, or an answer:
 2. Append the user's exact challenge-related message, including follow-ups,
    corrections, questions, and requests that result in no code changes.
 3. Record your tool/assistant name, exact model identifier or full model name
-   including its version and variant, and a timestamp if available. Record where the model identity came from
+   including its version and variant, and a timestamp if available. Record
+   where the model identity came from
    (runtime metadata, the selected model shown in the UI, or the user). Use
    `unknown` when the exact model cannot be verified; a known family name may
    be noted separately but is not an exact model identifier. Do not infer a

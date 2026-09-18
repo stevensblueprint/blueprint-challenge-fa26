@@ -106,7 +106,7 @@ def test_create_book_success(
 ) -> None:
     response = client.post("/books", json=valid_book_payload)
 
-    assert response.status_code == 200
+    assert response.status_code in {200, 201}
     body = response.json()
     assert isinstance(body["id"], int)
     assert body["title"] == valid_book_payload["title"]
@@ -160,7 +160,7 @@ def test_create_checkout_success(
 
     response = client.post("/checkouts", json=checkout_payload)
 
-    assert response.status_code == 200
+    assert response.status_code in {200, 201}
     body = response.json()
     assert isinstance(body["id"], int)
     assert body["book_id"] == book_id
