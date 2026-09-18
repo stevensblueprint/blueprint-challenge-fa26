@@ -4,8 +4,7 @@ This is a blank template for applicants. Follow `AGENTS.md` and append your own
 challenge-related entries below. Do not include the starter maintainers' work.
 Preserve earlier entries and append corrections rather than rewriting history.
 
-Record the exact model version and variant, such as `gpt-5.6-luna` or
-`gpt-6-astra`, not just `GPT-5`, `GPT-6`, or `Codex`. State the source of that
+Record the exact model version and variant. State the source of that
 identity; use `unknown` if it cannot be verified. Never include secrets or
 private internal reasoning.
 
