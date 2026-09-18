@@ -2,7 +2,7 @@
 
 ## Welcome to the Fall 2026 Coding Challenge!
 
-To complete challenge, please fork this repository, create a branch for your changes, and open a pull request against `main` when you're ready to submit your challenge. Please label your pull request with your name, i.e. `[Your Name] - Short description of your changes`.  
+To complete the challenge, please fork this repository, create a branch for your changes, and open a pull request against `main` when you're ready to submit your challenge. Please label your pull request with your name, such as `[Your Name] - Short description of your changes`.  
 
 Details below, and good luck!
 
