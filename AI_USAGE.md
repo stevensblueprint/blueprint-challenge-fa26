@@ -92,7 +92,7 @@ Explained Python 3.9 annotation compatibility and frontend test defects; no addi
 Tool/assistant: Codex
 Model: GPT-6
 Capture: Live
-Status: In progress
+Status: Completed — combined response recorded in Turn 7
 
 ### User prompt — verbatim
 ```text
@@ -103,17 +103,19 @@ ok so lets fix the frontend changes and we need ci actions to run the tests so i
 Modified only the three frontend test files to fix invalid mock typing, scope duplicate labels, model controlled state, and assert observable outcomes and HTTP semantics instead of call order or serialization details. Generated `.github/workflows/tests.yml` with Python 3.12 backend tests, Node.js 22 frontend tests, and a Grade job that passes only when both suites succeed. Modified README.md to explain grading and the preserved testing interfaces. Application implementations used for verification remain in a separate local worktree and are not part of this PR. No backend application code or backend tests changed.
 
 ### Verification
-Three completed frontend implementation variants each passed all 20 tests: manual/debounced/API filtering and refetch; immediate/API filtering with alternate equivalent HTTP encoding; automatic loading/client filtering/cached details/local appends/native required forms. The last variant also passed on Node.js 22.23.2. Six deliberate regressions were rejected: ignored genre, unsaved book, stale catalog, wrong checkout book, dropped history, and wrong HTTP method. The original unmodified tests failed all three suites against a completed implementation, reproducing their invalid mock syntax and overly restrictive assumptions. The reference backend passed all 12 original tests on Python 3.12.14 with the unchanged requirements, including FastAPI 0.129.0. The unchanged starter correctly failed 7 backend and 16 frontend tests; four component and five backend tests passed. Actionlint, frontend lint, and git diff --check passed. All 16 success/failure/cancelled/skipped combinations for the Grade shell were checked; only two successful suites produce PASS. No browser or application UI was opened. Publishing and hosted CI verification are pending.
+Three completed frontend implementation variants each passed all 20 tests: manual/debounced/API filtering and refetch; immediate/API filtering with alternate equivalent HTTP encoding; automatic loading/client filtering/cached details/local appends/native required forms. The last variant also passed on Node.js 22.23.2. Six deliberate regressions were rejected: ignored genre, unsaved book, stale catalog, wrong checkout book, dropped history, and wrong HTTP method. The original unmodified tests failed all three suites against a completed implementation, reproducing their invalid mock syntax and overly restrictive assumptions. The reference backend passed all 12 original tests on Python 3.12.14 with the unchanged requirements, including FastAPI 0.129.0. The unchanged starter correctly failed 7 backend and 16 frontend tests; four component and five backend tests passed. Actionlint, frontend lint, and git diff --check passed. All 16 success/failure/cancelled/skipped combinations for the Grade shell were checked; only two successful suites produce PASS. No browser or application UI was opened.
+
+Published PR #3 targeting main: https://github.com/stevensblueprint/blueprint-challenge-fa26/pull/3. Hosted pull-request run 35368379134 successfully installed both dependency sets, ran all tests, reproduced the same starter failures, and marked Grade FAIL. It warned about deprecated Node.js 20 action runtimes, so the workflow pins were updated to the current official checkout v7.0.1, setup-python v7.0.0, and setup-node v7.0.0 releases (Node.js 24 runtimes). Their release tags, commit SHAs, and supported inputs were verified through GitHub's API. An initial unquoted API URL failed zsh glob expansion; quoting the URL resolved it. A final run of the updated workflow remains to be observed after this log commit.
 
 ### Assistant response — verbatim
-Pending completion.
+Combined response recorded in Turn 7.
 
 ## Turn 7 — 2026-09-18
 Tool/assistant: Codex
 Model: gpt-6-astra (GPT-6 Astra; exact variant identified by the user)
 Model identity source: user
 Capture: Live
-Status: In progress
+Status: Completed
 
 ### User prompt — verbatim
 ```text
@@ -144,9 +146,15 @@ and correction instructions. Exact model names above are user-provided, not
 independently verified runtime metadata. Test outcomes are recorded in Turn 6.
 
 ### Assistant response — verbatim
-Pending completion.
+```text
+Created [PR #3](https://github.com/stevensblueprint/blueprint-challenge-fa26/pull/3): frontend test fixes, pass/fail CI, and exact model/version/variant logging.
 
-## Submission summary — 2026-09-18 (publishing in progress)
+Verified 20 frontend tests across three implementations and 12 backend tests; six intentional regressions were caught. Yes—the original frontend tests falsely failed valid implementations.
+
+CI correctly reports FAIL for the unfinished starter; no solution code was included and no browser/UI was opened.
+```
+
+## Submission summary — 2026-09-18
 
 Codex assisted via terminal commands, Git/GitHub CLI, local patches, pytest,
 Jest, ESLint, and actionlint. The user identified the earlier model as
