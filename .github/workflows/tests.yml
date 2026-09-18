@@ -13,8 +13,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  readiness:
+    name: Submission readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      ready: ${{ steps.todos.outputs.ready }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 scripts/check_readiness.py --self-test
+      - id: todos
+        name: Check for executable starter TODOs
+        run: python3 scripts/check_readiness.py >> "$GITHUB_OUTPUT"
+
   backend:
     name: Backend tests
+    needs: readiness
+    if: ${{ needs.readiness.outputs.ready == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -33,6 +50,8 @@ jobs:
 
   frontend:
     name: Frontend tests
+    needs: readiness
+    if: ${{ needs.readiness.outputs.ready == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -52,13 +71,15 @@ jobs:
 
   grade:
     name: Grade
-    needs: [backend, frontend]
-    if: ${{ always() }}
+    needs: [readiness, backend, frontend]
+    if: ${{ always() && !(needs.readiness.result == 'success' && needs.readiness.outputs.ready == 'false') }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: Pass only when both test suites pass
         env:
+          READINESS_RESULT: ${{ needs.readiness.result }}
+          READY: ${{ needs.readiness.outputs.ready }}
           BACKEND_RESULT: ${{ needs.backend.result }}
           FRONTEND_RESULT: ${{ needs.frontend.result }}
         run: |
@@ -69,7 +90,7 @@ jobs:
             echo "| Frontend | $FRONTEND_RESULT |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-          if [ "$BACKEND_RESULT" = success ] && [ "$FRONTEND_RESULT" = success ]; then
+          if [ "$READINESS_RESULT" = success ] && [ "$READY" = true ] && [ "$BACKEND_RESULT" = success ] && [ "$FRONTEND_RESULT" = success ]; then
             echo 'PASS — all tests passed.' | tee -a "$GITHUB_STEP_SUMMARY"
           else
             echo 'FAIL — both test suites must pass.' | tee -a "$GITHUB_STEP_SUMMARY"

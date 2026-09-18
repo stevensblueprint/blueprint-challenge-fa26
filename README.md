@@ -238,20 +238,33 @@ npm test -- --runInBand
 ### Automated pass/fail grading
 
 GitHub Actions runs **Challenge tests** on every push and pull request, and can
-also be run manually from the Actions tab. Python 3.12 runs the backend pytest
-suite; Node.js 22 runs the frontend Jest suite. No running servers or Docker
-containers are needed: backend tests use an isolated SQLite database, and
-frontend tests run in jsdom with mocked API calls.
+also be rerun manually from the Actions tab. No manual grading trigger is needed.
+**Submission readiness** first checks for the supplied executable TODO stubs in
+`backend/app.py`, `frontend/src/App.tsx`, and `frontend/src/api/api.ts`. While any
+remain, it reports **NOT GRADED** and skips both test jobs and Grade without a
+failure. TODO comments and scaffold UI text do not block grading.
+
+Once those stubs are implemented, the next push automatically runs backend
+pytest on Python 3.12 and frontend Jest on Node.js 22. No running servers or
+Docker containers are needed: backend tests use an isolated SQLite database,
+and frontend tests run in jsdom with mocked API calls.
 
 Use the **Grade** check on the submission's latest commit:
 
 - **PASS**: both Backend tests and Frontend tests passed.
+- **NOT GRADED / skipped**: executable starter TODOs remain. This is not a pass,
+  even if GitHub displays the overall workflow as green.
 - **FAIL**: either suite failed or did not complete successfully. Open its job
   log for the failing test or setup error; rerun after resolving setup failures.
 
-The unimplemented starter is expected to fail. These tests do not replace the
-challenge TODOs with a solution. Builds, lint, and Docker smoke checks are not
-additional grading requirements.
+The untouched starter is expected to skip grading. Removing a TODO message is
+not enough to pass: the implementation must satisfy both test suites. Readiness
+errors also fail grading rather than silently skip it. Builds, lint, and Docker
+smoke checks are not additional grading requirements.
+
+This avoids failed runs just for starting or partially completing the challenge.
+Email delivery still follows each person's GitHub Actions notification settings;
+the workflow does not change those preferences.
 
 The frontend tests use the supplied API exports, component props, section
 headings, labels, and catalog rows. Preserve these testing interfaces when
@@ -263,8 +276,8 @@ differences, and string or numeric checkout book IDs. Tests still require the
 correct requests, saved field values, and displayed results.
 
 Use the repository's test files and workflow unchanged when grading submissions.
-A green check reports these automated requirements; it does not verify visual
-design or PostgreSQL deployment.
+A successful, non-skipped Grade reports these automated requirements; it does
+not verify visual design or PostgreSQL deployment.
 
 ### Stop Services
 
