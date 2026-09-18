@@ -1,0 +1,98 @@
+name: Challenge tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: challenge-tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    name: Submission readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      ready: ${{ steps.todos.outputs.ready }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 scripts/check_readiness.py --self-test
+      - id: todos
+        name: Check for executable starter TODOs
+        run: python3 scripts/check_readiness.py >> "$GITHUB_OUTPUT"
+
+  backend:
+    name: Backend tests
+    needs: readiness
+    if: ${{ needs.readiness.outputs.ready == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: 'sqlite:///:memory:'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: python -m pip install -r backend/requirements.txt
+      - run: python -m pytest -q backend/tests
+
+  frontend:
+    name: Frontend tests
+    needs: readiness
+    if: ${{ needs.readiness.outputs.ready == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci
+
+  grade:
+    name: Grade
+    needs: [readiness, backend, frontend]
+    if: ${{ always() && !(needs.readiness.result == 'success' && needs.readiness.outputs.ready == 'false') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Pass only when both test suites pass
+        env:
+          READINESS_RESULT: ${{ needs.readiness.result }}
+          READY: ${{ needs.readiness.outputs.ready }}
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+        run: |
+          {
+            echo '| Suite | Result |'
+            echo '| --- | --- |'
+            echo "| Backend | $BACKEND_RESULT |"
+            echo "| Frontend | $FRONTEND_RESULT |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$READINESS_RESULT" = success ] && [ "$READY" = true ] && [ "$BACKEND_RESULT" = success ] && [ "$FRONTEND_RESULT" = success ]; then
+            echo 'PASS — all tests passed.' | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'FAIL — both test suites must pass.' | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

@@ -235,6 +235,27 @@ Run all frontend tests:
 npm test -- --runInBand
 ```
 
+### Automated pass/fail grading
+
+GitHub Actions runs **Challenge tests** automatically whenever you push changes
+or update your pull request. Grading is skipped while executable starter TODOs
+remain. Once you implement them, your next push runs the backend tests on
+Python 3.12 and frontend tests on Node.js 22. TODO comments alone do not prevent
+grading, and the automated tests do not require running servers or Docker.
+
+Check **Grade** on your latest commit:
+
+- **PASS**: both Backend tests and Frontend tests passed.
+- **NOT GRADED / skipped**: starter TODOs remain. This is not a pass,
+  even if GitHub displays the overall workflow as green.
+- **FAIL**: a test or setup step failed. Open the failed job's log, fix the
+  reported issue, and push your changes to run the checks again.
+
+Keep the supplied tests and workflow unchanged. The frontend tests rely on the
+provided API exports, component props, section headings, labels, and catalog
+rows, so preserve those interfaces as you complete the challenge. You can use
+client-side or API filtering and update local state or refetch after creation.
+
 ### Stop Services
 
 ```bash

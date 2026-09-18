@@ -11,8 +11,14 @@ On every user message, before research, commands, code changes, or an answer:
 1. Create `AI_USAGE.md` if it does not exist; otherwise preserve its contents.
 2. Append the user's exact challenge-related message, including follow-ups,
    corrections, questions, and requests that result in no code changes.
-3. Record your tool/assistant name, model if known, and a timestamp if available.
-   Use `unknown` for information you cannot verify.
+3. Record your tool/assistant name, exact model identifier or full model name
+   including its version and variant, and a timestamp if available. Record
+   where the model identity came from
+   (runtime metadata, the selected model shown in the UI, or the user). Use
+   `unknown` when the exact model cannot be verified; a known family name may
+   be noted separately but is not an exact model identifier. Do not infer a
+   variant from branding, capabilities, or an earlier session. Record model
+   changes per turn, and append a correction if an earlier entry was imprecise.
 4. Mark the entry `In progress`, then perform the requested work. Do not wait
    until the end of the conversation to record prompts.
 
@@ -45,22 +51,23 @@ than silently rewriting history; redact secrets whenever discovered.
 
 Repeat this structure for each user message:
 
-    ## Turn <next number> — <timestamp or unknown>
+    ### Turn <next number> — <timestamp or unknown>
     Tool/assistant: <name or unknown>
-    Model: <name or unknown>
+    Model: <exact identifier or full version and variant, or unknown>
+    Model identity source: <runtime metadata, selected model UI, user, or unknown>
     Capture: <Live or Backfilled>
     Status: In progress
 
-    ### User prompt — verbatim
+    #### User prompt — verbatim
     <exact message, in a suitable fenced block>
 
-    ### Assistance and code contribution
+    #### Assistance and code contribution
     <actions; files/functions; generated, modified, or reviewed>
 
-    ### Verification
+    #### Verification
     <checks and observed outcomes, or Not run>
 
-    ### Assistant response — verbatim
+    #### Assistant response — verbatim
     <complete user-facing response, in a suitable fenced block>
 
 ## At submission

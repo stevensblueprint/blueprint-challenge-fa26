@@ -8,11 +8,30 @@ import {
 
 describe('api contract', () => {
   const fetchMock = jest.fn()
+  const originalFetch = globalThis.fetch
 
   beforeEach(() => {
     fetchMock.mockReset()
     ;(globalThis as unknown as { fetch: typeof fetch }).fetch = fetchMock
   })
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+  })
+
+  // Compare HTTP semantics rather than query order, JSON key order, header
+  // casing, or whether the implementation spells out the default GET method.
+  function request() {
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [input, init] = fetchMock.mock.calls[0] as [RequestInfo | URL, RequestInit?]
+    const base = typeof input === 'object' && 'url' in input ? input : undefined
+    return {
+      url: new URL(base ? base.url : String(input), 'http://localhost:8000'),
+      method: (init?.method ?? base?.method ?? 'GET').toUpperCase(),
+      headers: new Headers(init?.headers ?? base?.headers),
+      json: async () => init?.body != null ? JSON.parse(String(init.body)) : base?.clone().json(),
+    }
+  }
 
   test('listBooks calls GET /books with q and genre query params', async () => {
     const books = [
@@ -34,10 +53,11 @@ describe('api contract', () => {
 
     const result = await listBooks({ q: 'hobbit', genre: 'Fiction' })
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/books?q=hobbit&genre=Fiction',
-      expect.objectContaining({ method: 'GET' }),
-    )
+    const sent = request()
+    expect(sent.method).toBe('GET')
+    expect(sent.url.pathname).toBe('/books')
+    expect(sent.url.searchParams.get('q')).toBe('hobbit')
+    expect(sent.url.searchParams.get('genre')).toBe('Fiction')
     expect(result).toEqual(books)
   })
 
@@ -59,10 +79,9 @@ describe('api contract', () => {
 
     const result = await getBook(7)
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/books/7',
-      expect.objectContaining({ method: 'GET' }),
-    )
+    const sent = request()
+    expect(sent.method).toBe('GET')
+    expect(sent.url.pathname).toBe('/books/7')
     expect(result).toEqual(book)
   })
 
@@ -83,14 +102,11 @@ describe('api contract', () => {
 
     const created = await createBook(payload)
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/books',
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(payload),
-      }),
-    )
+    const sent = request()
+    expect(sent.method).toBe('POST')
+    expect(sent.url.pathname).toBe('/books')
+    expect(sent.headers.get('content-type')).toMatch(/^application\/json(?:;|$)/i)
+    expect(await sent.json()).toEqual(payload)
     expect(created).toEqual({ id: 3, ...payload })
   })
 
@@ -112,10 +128,9 @@ describe('api contract', () => {
 
     const result = await listBookCheckouts(1)
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/books/1/checkouts',
-      expect.objectContaining({ method: 'GET' }),
-    )
+    const sent = request()
+    expect(sent.method).toBe('GET')
+    expect(sent.url.pathname).toBe('/books/1/checkouts')
     expect(result).toEqual(checkouts)
   })
 
@@ -134,14 +149,35 @@ describe('api contract', () => {
 
     const created = await createCheckout(payload)
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/checkouts',
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(payload),
-      }),
-    )
+    const sent = request()
+    expect(sent.method).toBe('POST')
+    expect(sent.url.pathname).toBe('/checkouts')
+    expect(sent.headers.get('content-type')).toMatch(/^application\/json(?:;|$)/i)
+    const body = await sent.json()
+    expect([payload.book_id, Number(payload.book_id)]).toContain(body.book_id)
+    expect({ ...body, book_id: payload.book_id }).toEqual(payload)
     expect(created).toEqual({ id: 12, ...payload, book_id: 1 })
+  })
+
+  test.each([undefined, {}, { q: '', genre: 'All' as const }])(
+    'listBooks omits inactive filters for %j', async (params) => {
+      fetchMock.mockResolvedValue({ ok: true, json: async () => [] })
+      expect(await listBooks(params)).toEqual([])
+      const sent = request()
+      expect(sent.method).toBe('GET')
+      expect(sent.url.pathname).toBe('/books')
+      expect(sent.url.searchParams.get('q') ?? '').toBe('')
+      expect(sent.url.searchParams.get('genre') ?? '').toBe('')
+    },
+  )
+
+  test('listBooks preserves special characters in a search query', async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: async () => [] })
+    const q = 'C++ & books? #1'
+    await listBooks({ q, genre: 'Non-Fiction' })
+    const sent = request()
+    expect(sent.url.pathname).toBe('/books')
+    expect(sent.url.searchParams.get('q')).toBe(q)
+    expect(sent.url.searchParams.get('genre')).toBe('Non-Fiction')
   })
 })
