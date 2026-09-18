@@ -235,6 +235,37 @@ Run all frontend tests:
 npm test -- --runInBand
 ```
 
+### Automated pass/fail grading
+
+GitHub Actions runs **Challenge tests** on every push and pull request, and can
+also be run manually from the Actions tab. Python 3.12 runs the backend pytest
+suite; Node.js 22 runs the frontend Jest suite. No running servers or Docker
+containers are needed: backend tests use an isolated SQLite database, and
+frontend tests run in jsdom with mocked API calls.
+
+Use the **Grade** check on the submission's latest commit:
+
+- **PASS**: both Backend tests and Frontend tests passed.
+- **FAIL**: either suite failed or did not complete successfully. Open its job
+  log for the failing test or setup error; rerun after resolving setup failures.
+
+The unimplemented starter is expected to fail. These tests do not replace the
+challenge TODOs with a solution. Builds, lint, and Docker smoke checks are not
+additional grading requirements.
+
+The frontend tests use the supplied API exports, component props, section
+headings, labels, and catalog rows. Preserve these testing interfaces when
+completing the TODOs. Within them, automatic or manual loading, immediate or
+debounced filtering, client-side or API filtering, and refetching or updating
+local state after creation are supported. HTTP assertions allow default GET,
+either query parameter order, header casing differences, JSON key order
+differences, and string or numeric checkout book IDs. Tests still require the
+correct requests, saved field values, and displayed results.
+
+Use the repository's test files and workflow unchanged when grading submissions.
+A green check reports these automated requirements; it does not verify visual
+design or PostgreSQL deployment.
+
 ### Stop Services
 
 ```bash
