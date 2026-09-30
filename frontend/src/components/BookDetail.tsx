@@ -24,24 +24,33 @@ function BookDetail({ book, checkouts }: BookDetailProps) {
       <dl>
         <dt>Author</dt>
         <dd>{book.author}</dd>
+
         <dt>Publisher Email</dt>
         <dd>{book.publisher_email}</dd>
+
         <dt>Shelf Location</dt>
         <dd>{book.shelf_location}</dd>
       </dl>
 
       <h3>Checkouts</h3>
-      <ul className="list">
-        {checkouts.map((checkout) => (
-          <li key={checkout.id} className="list-item">
-            <div>
-              <strong>{checkout.patron_name}</strong>
-              <span className="tag">{checkout.date}</span>
-            </div>
-            <p>{checkout.notes}</p>
-          </li>
-        ))}
-      </ul>
+
+      {checkouts.length === 0 ? (
+        <p className="empty-state">
+          No checkout history for this book.
+        </p>
+      ) : (
+        <ul className="list">
+          {checkouts.map((checkout) => (
+            <li key={checkout.id} className="list-item">
+              <div>
+                <strong>{checkout.patron_name}</strong>
+                <span className="tag">{checkout.date}</span>
+              </div>
+              <p>{checkout.notes}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
