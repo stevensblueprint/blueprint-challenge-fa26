@@ -8,6 +8,7 @@ type BookListProps = {
   onGenreChange: (next: Genre | 'All') => void
   onSelectBook: (id: number) => void
   genres: Genre[]
+  hasSearched?: boolean
 }
 
 function BookList({
@@ -18,6 +19,7 @@ function BookList({
   onGenreChange,
   onSelectBook,
   genres,
+  hasSearched = false,
 }: BookListProps) {
   return (
     <section className="card">
@@ -36,7 +38,9 @@ function BookList({
         <select
           id="book-genre-filter"
           value={genreFilter}
-          onChange={(event) => onGenreChange(event.target.value as Genre | 'All')}
+          onChange={(event) =>
+            onGenreChange(event.target.value as Genre | 'All')
+          }
         >
           <option value="All">All</option>
           {genres.map((genre) => (
@@ -47,18 +51,29 @@ function BookList({
         </select>
       </div>
 
-      {/* TODO: Add empty-state messaging when no books match the current search/filter. */}
-      <ul className="list">
-        {books.map((book) => (
-          <li key={book.id} className="list-item">
-            <div>
-              <strong>{book.title}</strong>
-              <span className="tag">{book.genre}</span>
-            </div>
-            <button onClick={() => onSelectBook(book.id)}>View Details</button>
-          </li>
-        ))}
-      </ul>
+      {books.length > 0 ? (
+        <ul className="list">
+          {books.map((book) => (
+            <li key={book.id} className="list-item">
+              <div>
+                <strong>{book.title}</strong>
+                <span className="tag">{book.genre}</span>
+              </div>
+              <button onClick={() => onSelectBook(book.id)}>
+                View Details
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : hasSearched ? (
+        <p className="empty-state">
+          No books match the current search and genre.
+        </p>
+      ) : (
+        <p className="empty-state">
+          Search the catalog to view books.
+        </p>
+      )}
     </section>
   )
 }

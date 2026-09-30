@@ -6,6 +6,14 @@ import BookForm from './components/BookForm'
 import BookList from './components/BookList'
 import { GENRES, type Genre, type Checkout, type CheckoutFormValues, type Book, type BookFormValues } from './types'
 
+import {
+  listBooks,
+  getBook,
+  createBook,
+  listBookCheckouts,
+  createCheckout,
+} from './api/api'
+
 const initialBookForm: BookFormValues = {
   title: '',
   genre: 'Fiction',
@@ -30,94 +38,151 @@ function App() {
   const [genreFilter, setGenreFilter] = useState<Genre | 'All'>('All')
   const [bookForm, setBookForm] = useState<BookFormValues>(initialBookForm)
   const [checkoutForm, setCheckoutForm] = useState<CheckoutFormValues>(initialCheckoutForm)
-  const [error, setError] = useState<string | null>(null)
+  const [bookError, setBookError] = useState<string | null>(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [hasSearched, setHasSearched] = useState(false)
 
   async function handleLoadBooks() {
-    void search
-    void genreFilter
-    void setBooks
-    // TODO: Implement book list loading using src/api/api.ts.
-    setError('TODO: implement handleLoadBooks in App.tsx')
+    const loadedBooks = await listBooks({ q: search, genre: genreFilter })
+
+    setBooks(loadedBooks)
+    setHasSearched(true)
   }
 
   async function handleSelectBook(bookId: number) {
-    void bookId
-    void setSelectedBook
-    void setBookCheckouts
-    void setCheckoutForm
-    // TODO: Implement selected book + checkouts fetch using src/api/api.ts.
-    setError('TODO: implement handleSelectBook in App.tsx')
+    const book = await getBook(bookId)
+    const checkouts = await listBookCheckouts(bookId)
+
+    setSelectedBook(book)
+    setBookCheckouts(checkouts)
+
+    setCheckoutForm((current) => ({
+      ...current,
+      book_id: String(bookId),
+    }))
   }
 
   function handleBookFormChange(next: BookFormValues) {
-    void next
-    // TODO: Implement book form state handling.
-    setError('TODO: implement book form state updates in App.tsx')
+    setBookForm(next)
   }
 
   function handleCheckoutFormChange(next: CheckoutFormValues) {
-    void next
-    // TODO: Implement checkout form state handling.
-    setError('TODO: implement checkout form state updates in App.tsx')
+    setCheckoutForm(next)
   }
 
   async function handleCreateBook() {
-    void bookForm
-    void setBookForm
-    // TODO: Implement book creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateBook in App.tsx')
+    if (
+      !bookForm.title.trim() ||
+      !bookForm.description.trim() ||
+      !bookForm.author.trim() ||
+      !bookForm.publisher_email.trim() ||
+      !bookForm.shelf_location.trim()
+    ) {
+      setBookError('Please complete all book fields.')
+      return
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    if (!emailPattern.test(bookForm.publisher_email)) {
+      setBookError('Please enter a valid publisher email address.')
+      return
+    }
+
+    const createdBook = await createBook(bookForm)
+
+    setBooks((current) => [...current, createdBook])
+    setBookForm(initialBookForm)
+    setBookError(null)
   }
 
   async function handleCreateCheckout() {
-    void checkoutForm
-    void selectedBook
-    void setCheckoutForm
-    // TODO: Implement checkout creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateCheckout in App.tsx')
+    if (
+      !checkoutForm.patron_name.trim() ||
+      !checkoutForm.book_id ||
+      !checkoutForm.date ||
+      !checkoutForm.notes.trim()
+    ) {
+      setCheckoutError('Please complete all checkout fields.')
+      return
+    }
+
+    await createCheckout(checkoutForm)
+
+    if (selectedBook) {
+      const checkouts = await listBookCheckouts(selectedBook.id)
+      setBookCheckouts(checkouts)
+    }
+
+    setCheckoutForm({
+      ...initialCheckoutForm,
+      book_id: selectedBook ? String(selectedBook.id) : '',
+    })
+
+    setCheckoutError(null)
   }
 
   return (
     <main className="layout">
-      <header>
+      <header className="app-header">
         <h1>LibraryConnect Resource Hub</h1>
-        <p>Starter frontend scaffold with TODOs for API integration.</p>
+        <p>Manage the library catalog, view book details, and manage checkouts.</p>
       </header>
 
-      {error ? <p className="error">{error}</p> : null}
+      <section className="card catalog-controls">
+        <div>
+          <h2>Catalog</h2>
+          <p>Search the catalog by title or narrow results by genre.</p>
+        </div>
 
-      <section className="card">
-        <h2>Integration TODO</h2>
-        <p>
-          Route handlers, form wiring, and API calls are intentionally left as TODOs for the team.
-        </p>
-        <button onClick={() => void handleLoadBooks()}>Load Books (TODO API)</button>
+        <button onClick={() => void handleLoadBooks()}>Load Books</button>
       </section>
 
-      <BookList
-        books={books}
-        search={search}
-        genreFilter={genreFilter}
-        onSearchChange={setSearch}
-        onGenreChange={setGenreFilter}
-        onSelectBook={(bookId) => void handleSelectBook(bookId)}
-        genres={GENRES}
-      />
+      <div className="dashboard-grid">
+        <BookList
+          books={books}
+          search={search}
+          genreFilter={genreFilter}
+          onSearchChange={setSearch}
+          onGenreChange={setGenreFilter}
+          onSelectBook={(bookId) => void handleSelectBook(bookId)}
+          genres={GENRES}
+          hasSearched={hasSearched}
+        />
 
-      <BookForm
-        values={bookForm}
-        genres={GENRES}
-        onChange={handleBookFormChange}
-        onSubmit={() => void handleCreateBook()}
-      />
+        <BookDetail
+          book={selectedBook}
+          checkouts={bookCheckouts}
+        />
+      </div>
 
-      <BookDetail book={selectedBook} checkouts={bookCheckouts} />
+      <div className="forms-grid">
+        <div className="form-column">
+          <BookForm
+            values={bookForm}
+            genres={GENRES}
+            onChange={handleBookFormChange}
+            onSubmit={() => void handleCreateBook()}
+          />
 
-      <CheckoutForm
-        values={checkoutForm}
-        books={books}
-        onChange={handleCheckoutFormChange}
-        onSubmit={() => void handleCreateCheckout()}
-      />
+          {bookError ? (
+            <p className="error form-error">{bookError}</p>
+          ) : null}
+        </div>
+
+        <div className="form-column">
+          <CheckoutForm
+            values={checkoutForm}
+            books={books}
+            onChange={handleCheckoutFormChange}
+            onSubmit={() => void handleCreateCheckout()}
+          />
+
+          {checkoutError ? (
+            <p className="error form-error">{checkoutError}</p>
+          ) : null}
+        </div>
+      </div>
     </main>
   )
 }
