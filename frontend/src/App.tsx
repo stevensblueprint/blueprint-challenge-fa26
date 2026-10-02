@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import './App.css'
+import { listBooks, getBook, listBookCheckouts, createBook, createCheckout } from './api/api'
 import CheckoutForm from './components/CheckoutForm'
 import BookDetail from './components/BookDetail'
 import BookForm from './components/BookForm'
@@ -32,69 +33,169 @@ function App() {
   const [checkoutForm, setCheckoutForm] = useState<CheckoutFormValues>(initialCheckoutForm)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleLoadBooks() {
-    void search
-    void genreFilter
-    void setBooks
-    // TODO: Implement book list loading using src/api/api.ts.
-    setError('TODO: implement handleLoadBooks in App.tsx')
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [loadingDetails, setLoadingDetails] = useState(false)
+  const [savingBook, setSavingBook] = useState(false)
+  const [savingCheckout, setSavingCheckout] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
+  const selectionRequest = useRef(0)
+  const catalogRequest = useRef(0)
+  const selectedId = useRef<number | null>(null)
+  const bookPending = useRef(false)
+  const checkoutPending = useRef(false)
+
+  function errorMessage(reason: unknown) {
+    return reason instanceof Error ? reason.message : 'Request failed. Please try again.'
   }
 
+  const handleLoadBooks = useCallback(async () => {
+    const request = ++catalogRequest.current
+    setLoadingBooks(true)
+    setError(null)
+    try {
+      const savedBooks = await listBooks()
+      if (request === catalogRequest.current) setBooks(savedBooks)
+    } catch (reason) {
+      if (request === catalogRequest.current) setError(errorMessage(reason))
+    } finally {
+      if (request === catalogRequest.current) setLoadingBooks(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const catalog = catalogRequest
+    const selection = selectionRequest
+    void handleLoadBooks()
+    return () => {
+      catalog.current++
+      selection.current++
+      selectedId.current = null
+    }
+  }, [handleLoadBooks])
+
   async function handleSelectBook(bookId: number) {
-    void bookId
-    void setSelectedBook
-    void setBookCheckouts
-    void setCheckoutForm
-    // TODO: Implement selected book + checkouts fetch using src/api/api.ts.
-    setError('TODO: implement handleSelectBook in App.tsx')
+    const request = ++selectionRequest.current
+    selectedId.current = bookId
+    setSelectedBook(null)
+    setBookCheckouts([])
+    setLoadingDetails(true)
+    setError(null)
+    // Do not change the submitted form while its request is pending.
+    if (!checkoutPending.current) {
+      setCheckoutForm((current) => ({ ...current, book_id: String(bookId) }))
+    }
+    try {
+      const [book, checkouts] = await Promise.all([getBook(bookId), listBookCheckouts(bookId)])
+      if (request !== selectionRequest.current) return
+      setSelectedBook(book)
+      setBookCheckouts(checkouts)
+    } catch (reason) {
+      if (request === selectionRequest.current) setError(errorMessage(reason))
+    } finally {
+      if (request === selectionRequest.current) setLoadingDetails(false)
+    }
   }
 
   function handleBookFormChange(next: BookFormValues) {
-    void next
-    // TODO: Implement book form state handling.
-    setError('TODO: implement book form state updates in App.tsx')
+    setBookForm(next)
   }
 
   function handleCheckoutFormChange(next: CheckoutFormValues) {
-    void next
-    // TODO: Implement checkout form state handling.
-    setError('TODO: implement checkout form state updates in App.tsx')
+    setCheckoutForm(next)
   }
 
   async function handleCreateBook() {
-    void bookForm
-    void setBookForm
-    // TODO: Implement book creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateBook in App.tsx')
+    if (bookPending.current) return
+    bookPending.current = true
+    setSavingBook(true)
+    setError(null)
+    setNotice(null)
+    try {
+      const book = await createBook(bookForm)
+      // Ignore an older catalog load that could otherwise erase the new book.
+      catalogRequest.current++
+      setLoadingBooks(false)
+      setBooks((current) => [...current.filter((item) => item.id !== book.id), book])
+      setBookForm({ ...initialBookForm })
+      setSearch('')
+      setGenreFilter('All')
+      setNotice(`Created "${book.title}".`)
+      await handleSelectBook(book.id)
+    } catch (reason) {
+      setError(errorMessage(reason))
+    } finally {
+      bookPending.current = false
+      setSavingBook(false)
+    }
   }
 
   async function handleCreateCheckout() {
-    void checkoutForm
-    void selectedBook
-    void setCheckoutForm
-    // TODO: Implement checkout creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateCheckout in App.tsx')
+    if (checkoutPending.current) return
+    if (!checkoutForm.book_id) {
+      setError('Select a book for the checkout.')
+      return
+    }
+    checkoutPending.current = true
+    setSavingCheckout(true)
+    setError(null)
+    setNotice(null)
+    try {
+      const checkout = await createCheckout(checkoutForm)
+      setCheckoutForm((current) => ({ ...current, patron_name: '', notes: '' }))
+      setNotice('Checkout created.')
+      // Refresh only if the user is still viewing the submitted book.
+      // A later selection increments the request token and invalidates this fetch.
+      if (selectedId.current === checkout.book_id) {
+        const request = ++selectionRequest.current
+        setLoadingDetails(true)
+        try {
+          const [book, checkouts] = await Promise.all([
+            getBook(checkout.book_id), listBookCheckouts(checkout.book_id),
+          ])
+          if (request === selectionRequest.current) {
+            setSelectedBook(book)
+            setBookCheckouts(checkouts)
+          }
+        } catch (reason) {
+          if (request === selectionRequest.current) {
+            setError(`Checkout saved, but history could not refresh: ${errorMessage(reason)}`)
+          }
+        } finally {
+          if (request === selectionRequest.current) setLoadingDetails(false)
+        }
+      }
+    } catch (reason) {
+      setError(errorMessage(reason))
+    } finally {
+      checkoutPending.current = false
+      setSavingCheckout(false)
+    }
   }
+
+  // Keep the full catalog for checkout choices when the visible list is filtered.
+  const visibleBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(search.toLowerCase()) &&
+    (genreFilter === 'All' || book.genre === genreFilter),
+  )
 
   return (
     <main className="layout">
       <header>
         <h1>LibraryConnect Resource Hub</h1>
-        <p>Starter frontend scaffold with TODOs for API integration.</p>
+        <p>Manage books and patron checkouts.</p>
       </header>
 
-      {error ? <p className="error">{error}</p> : null}
+      {error ? <p className="error" role="alert">{error}</p> : null}
 
-      <section className="card">
-        <h2>Integration TODO</h2>
-        <p>
-          Route handlers, form wiring, and API calls are intentionally left as TODOs for the team.
-        </p>
-        <button onClick={() => void handleLoadBooks()}>Load Books (TODO API)</button>
-      </section>
+      {notice ? <p role="status">{notice}</p> : null}
+      <button disabled={loadingBooks} onClick={() => void handleLoadBooks()}>
+        {loadingBooks ? 'Loading books…' : 'Reload Books'}
+      </button>
+      {loadingBooks ? <p role="status">Loading books…</p> : null}
 
       <BookList
-        books={books}
+        books={visibleBooks}
+        loading={loadingBooks}
         search={search}
         genreFilter={genreFilter}
         onSearchChange={setSearch}
@@ -105,15 +206,17 @@ function App() {
 
       <BookForm
         values={bookForm}
+        submitting={savingBook}
         genres={GENRES}
         onChange={handleBookFormChange}
         onSubmit={() => void handleCreateBook()}
       />
 
-      <BookDetail book={selectedBook} checkouts={bookCheckouts} />
+      <BookDetail book={selectedBook} checkouts={bookCheckouts} loading={loadingDetails} />
 
       <CheckoutForm
         values={checkoutForm}
+        submitting={savingCheckout}
         books={books}
         onChange={handleCheckoutFormChange}
         onSubmit={() => void handleCreateCheckout()}

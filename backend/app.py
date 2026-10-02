@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
+from typing import Literal
+
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 try:
@@ -11,6 +14,8 @@ try:
         BookCreate,
         BookResponse,
     )
+    from .database import get_db
+    from .db_models import Book, Checkout
 except ImportError:
     from models import (
         CheckoutCreate,
@@ -19,6 +24,8 @@ except ImportError:
         BookCreate,
         BookResponse,
     )
+    from database import get_db
+    from db_models import Book, Checkout
 
 app = FastAPI(title="LibraryConnect API Starter")
 
@@ -37,36 +44,61 @@ def healthcheck() -> dict[str, str]:
 
 
 @app.post("/books", response_model=BookResponse)
-def create_book(payload: BookCreate) -> BookResponse:
+def create_book(payload: BookCreate, db: Session = Depends(get_db)) -> BookResponse:
     _ = payload
-    # TODO: Implement persistence and return the newly created book.
-    raise HTTPException(status_code=501, detail="TODO: implement POST /books")
+    row = Book(**payload.model_dump(mode="json"))
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return BookResponse.model_validate(row, from_attributes=True)
 
 
 @app.get("/books", response_model=list[BookResponse])
-def list_books(q: str | None = None, genre: BookGenre | None = None) -> list[BookResponse]:
-    _ = q
-    _ = genre
-    # TODO: Implement search by title (q) and filter by genre.
-    raise HTTPException(status_code=501, detail="TODO: implement GET /books")
+def list_books(
+    q: str | None = None,
+    genre: BookGenre | Literal["All"] | None = None,
+    db: Session = Depends(get_db),
+) -> list[BookResponse]:
+    query = db.query(Book)
+    if q:
+        query = query.filter(Book.title.icontains(q, autoescape=True))
+    if genre is not None and genre != "All":
+        query = query.filter(Book.genre == genre)
+    rows = query.order_by(Book.id).all()
+    return [BookResponse.model_validate(row, from_attributes=True) for row in rows]
 
 
 @app.get("/books/{book_id}", response_model=BookResponse)
-def get_book(book_id: int) -> BookResponse:
-    _ = book_id
-    # TODO: Return a single book by id, or 404 if not found.
-    raise HTTPException(status_code=501, detail="TODO: implement GET /books/{id}")
+def get_book(book_id: int, db: Session = Depends(get_db)) -> BookResponse:
+    row = db.get(Book, book_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return BookResponse.model_validate(row, from_attributes=True)
 
 
 @app.post("/checkouts", response_model=CheckoutResponse)
-def create_checkout(payload: CheckoutCreate) -> CheckoutResponse:
-    _ = payload
-    # TODO: Validate book exists, then create and return checkout.
-    raise HTTPException(status_code=501, detail="TODO: implement POST /checkouts")
+def create_checkout(
+    payload: CheckoutCreate, db: Session = Depends(get_db)
+) -> CheckoutResponse:
+    if db.get(Book, payload.book_id) is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    row = Checkout(**payload.model_dump())
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return CheckoutResponse.model_validate(row, from_attributes=True)
 
 
 @app.get("/books/{book_id}/checkouts", response_model=list[CheckoutResponse])
-def list_book_checkouts(book_id: int) -> list[CheckoutResponse]:
-    _ = book_id
-    # TODO: Return checkouts associated with the given book.
-    raise HTTPException(status_code=501, detail="TODO: implement GET /books/{id}/checkouts")
+def list_book_checkouts(
+    book_id: int, db: Session = Depends(get_db)
+) -> list[CheckoutResponse]:
+    if db.get(Book, book_id) is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    rows = (
+        db.query(Checkout)
+        .filter(Checkout.book_id == book_id)
+        .order_by(Checkout.id)
+        .all()
+    )
+    return [CheckoutResponse.model_validate(row, from_attributes=True) for row in rows]

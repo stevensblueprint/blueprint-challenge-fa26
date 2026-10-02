@@ -1,6 +1,7 @@
 import type { Book, Genre } from '../types'
 
 type BookListProps = {
+  loading?: boolean
   books: Book[]
   search: string
   genreFilter: Genre | 'All'
@@ -12,6 +13,7 @@ type BookListProps = {
 
 function BookList({
   books,
+  loading = false,
   search,
   genreFilter,
   onSearchChange,
@@ -47,7 +49,7 @@ function BookList({
         </select>
       </div>
 
-      {/* TODO: Add empty-state messaging when no books match the current search/filter. */}
+      {!loading && books.length === 0 ? <p>No books match the current search and genre.</p> : null}
       <ul className="list">
         {books.map((book) => (
           <li key={book.id} className="list-item">
