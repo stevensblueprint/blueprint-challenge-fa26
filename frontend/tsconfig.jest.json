@@ -2,6 +2,7 @@
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "module": "commonjs",
+    "allowJs": true,
     "types": ["jest", "@testing-library/jest-dom", "vite/client"],
     "esModuleInterop": true,
     "verbatimModuleSyntax": false,

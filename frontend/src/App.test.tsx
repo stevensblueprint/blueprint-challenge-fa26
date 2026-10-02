@@ -77,6 +77,7 @@ async function selectBook(user: ReturnType<typeof userEvent.setup>, book: Book) 
 
 describe('App challenge acceptance tests', () => {
   beforeEach(() => {
+    window.history.replaceState(null, '', '#/books')
     jest.resetAllMocks()
     const books = [hobbit, companion, handbook].map((book) => ({ ...book }))
     const checkouts: Checkout[] = [{
@@ -149,6 +150,7 @@ describe('App challenge acceptance tests', () => {
       publisher_email: 'contact@harpercollins.org',
       shelf_location: 'CHI-SEN-002',
     }
+    await user.click(screen.getByRole('link', { name: 'Add a book' }))
     const form = section('Create Book')
     await user.type(form.getByLabelText(/^title$/i), payload.title)
     await user.selectOptions(form.getByLabelText(/genre/i), payload.genre)
@@ -176,6 +178,7 @@ describe('App challenge acceptance tests', () => {
     expect(await detail.findByText('Priya Nair')).toBeInTheDocument()
     expect(detail.getByText('Due back in 3 weeks')).toBeInTheDocument()
 
+    await user.click(screen.getByRole('button', { name: 'Back to catalog' }))
     await selectBook(user, hobbit)
     expect(section(hobbit.title).getByText(hobbit.description)).toBeInTheDocument()
     await waitFor(() => expect(section(hobbit.title).queryByText('Priya Nair')).not.toBeInTheDocument())
@@ -188,9 +191,11 @@ describe('App challenge acceptance tests', () => {
     await selectBook(user, companion)
     expect(await section(companion.title).findByText('Priya Nair')).toBeInTheDocument()
 
+    await user.click(screen.getByRole('button', { name: /record checkout/i }))
     const form = section('Create Checkout')
     await user.type(form.getByLabelText(/patron name/i), 'Marcus Webb')
-    await user.selectOptions(form.getByLabelText(/^book$/i), String(companion.id))
+    expect(form.getByLabelText(/^book$/i)).toHaveValue(String(companion.id))
+    expect(form.getByLabelText(/^book$/i)).toBeDisabled()
     await user.clear(form.getByLabelText(/^date$/i))
     await user.type(form.getByLabelText(/^date$/i), '2026-02-20')
     await user.type(form.getByLabelText(/notes/i), 'Renewed once already')

@@ -1,22 +1,36 @@
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  line-height: 1.4;
+  --serif: 'Alegreya', Georgia, 'Times New Roman', serif;
+  --sans: 'Alegreya Sans', 'Segoe UI', 'Trebuchet MS', sans-serif;
+  --ink: #33281e;
+  --ink-soft: #6b5a46;
+  --paper: #f3ead3;
+  --paper-deep: #e8dbbb;
+  --rule: #cdbb97;
+  --moss: #3f5a34;
+  --moss-dark: #2c4126;
+  --binding: #3b4d35;
+  --ribbon: #8c2f27;
+  /* Cloth weave for the catalog binding, drawn as coarse pixels. */
+  --cloth: repeating-conic-gradient(#ffffff08 0 25%, #00000012 0 50%) 0 0 / 4px 4px;
+  font-family: var(--sans);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--binding);
+  line-height: 1.5;
   font-weight: 400;
-  color: #0f172a;
-  background: #f8fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: var(--binding) var(--cloth); }
+h1, h2, h3, p { margin-top: 0; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; text-wrap: balance; }
+button, input, select, textarea { font: inherit; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, a { touch-action: manipulation; }
+a { color: inherit; }
+button:disabled { cursor: default; opacity: 0.55; }
+:focus-visible { outline: 2px solid #9a6a2c; outline-offset: 3px; }
+::selection { background: #d9c08a; color: #2b2119; }

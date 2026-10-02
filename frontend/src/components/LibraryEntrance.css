@@ -1,0 +1,46 @@
+.library-entrance { height: 100svh; min-height: 460px; position: relative; overflow: hidden; background: #0c0907; color: #efe2c4; isolation: isolate; }
+.voxel-room, .library-fallback { position: absolute; inset: 0; }
+.voxel-room canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.library-fallback .library-room { width: 100%; height: 100%; }
+.library-fallback { opacity: .55; }
+.library-entrance::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, #0806047a 100%); }
+.room-navigation { position: absolute; z-index: 2; inset: 20px 28px auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.room-wordmark, .room-skip { display: inline-flex; align-items: center; text-decoration: none; min-height: 44px; text-shadow: 0 1px 3px #000c; }
+.room-wordmark { font-family: var(--serif); font-size: 20px; color: #f1e4c4; }
+.room-skip { font-size: 13px; color: #d9c9a6; padding: 0 4px; border-bottom: 1px solid transparent; transition: color 140ms ease-out; }
+.room-skip:hover { color: #fff3d6; }
+.room-guidance { position: absolute; z-index: 2; bottom: max(28px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 18px; text-align: center; text-shadow: 0 1px 3px #000, 0 0 12px #000a; }
+.room-guidance p { margin: 0; font-size: 14px; line-height: 1.5; color: #e9dcbc; }
+.room-action { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px; font-size: 13px; font-weight: 500; color: #f6ead0; text-decoration: none; text-shadow: none;
+  background: #2a1f15cc; border: 1px solid #c9a96a80; box-shadow: inset 0 1px #ffffff14; transition: background-color 140ms ease-out, border-color 140ms ease-out, transform 100ms ease-out; }
+.room-action:hover:not(:disabled) { background: #3a2c1ee6; border-color: #e0c78f; }
+.room-action:active:not(:disabled) { transform: translateY(1px); }
+.room-back { background: none; color: #d9c9a6; min-height: 40px; padding: 0 8px; font-size: 13px; font-weight: 400; gap: 8px; text-shadow: inherit; }
+.room-back:hover:not(:disabled) { background: none; color: #fff3d6; }
+.room-back kbd { font: inherit; font-size: 11px; border: 1px solid #a8946d88; padding: 0 5px; color: #c4b28c; }
+/* The book itself is the control; the scene draws its hover state. */
+.catalog-book-hotspot { position: absolute; z-index: 1; padding: 0; background: transparent; border: 0; cursor: pointer; min-width: 44px; min-height: 44px; }
+.catalog-book-hotspot:hover:not(:disabled) { background: transparent; }
+.catalog-book-hotspot:focus-visible { outline: 2px dashed #f2dda6; outline-offset: 8px; }
+.book-portal { position: absolute; top: 0; left: 0; z-index: 10; background: #3b4d35 var(--cloth); visibility: hidden; pointer-events: none; will-change: transform; backface-visibility: hidden; }
+.portal-cover { position: absolute; inset: 0; background-size: 100% 100%; image-rendering: pixelated; }
+.portal-shade { position: absolute; inset: 0; background: linear-gradient(90deg, #0000, #000); opacity: 0; }
+.library-handoff { position: fixed; inset: 0; z-index: 20; height: 100dvh; background: transparent; pointer-events: none; }
+.library-handoff::after { display: none; }
+.library-handoff .voxel-room, .library-handoff .room-guidance, .library-handoff .room-navigation { visibility: hidden; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.library-entrance [hidden] { display: none; }
+.library-entrance:focus { outline: none; }
+@media (max-width: 600px) {
+  .room-navigation { inset: max(12px, env(safe-area-inset-top)) 16px auto; }
+  .room-wordmark { font-size: 17px; }
+  .room-skip { font-size: 12px; }
+  .room-guidance { bottom: max(20px, env(safe-area-inset-bottom)); flex-direction: column; }
+  .room-guidance p { font-size: 13px; }
+}
+@media (max-height: 600px) and (min-width: 601px) {
+  .library-entrance { min-height: 320px; }
+  .room-navigation { top: 8px; }
+  .room-guidance { bottom: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .room-action, .room-skip { transition: none; } .room-action:active:not(:disabled) { transform: none; } }

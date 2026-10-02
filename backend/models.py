@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from datetime import date
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class BookGenre(str, enum.Enum):
@@ -16,12 +16,14 @@ class BookGenre(str, enum.Enum):
 
 
 class BookCreate(BaseModel):
-    title: str
+    model_config = ConfigDict(str_strip_whitespace=True, from_attributes=True)
+
+    title: str = Field(min_length=1, max_length=255)
     genre: BookGenre
-    description: str
-    author: str
-    publisher_email: EmailStr
-    shelf_location: str
+    description: str = Field(min_length=1)
+    author: str = Field(min_length=1, max_length=255)
+    publisher_email: EmailStr = Field(max_length=255)
+    shelf_location: str = Field(min_length=1, max_length=64)
 
 
 class BookResponse(BookCreate):
@@ -29,8 +31,10 @@ class BookResponse(BookCreate):
 
 
 class CheckoutCreate(BaseModel):
-    patron_name: str
-    book_id: int
+    model_config = ConfigDict(str_strip_whitespace=True, from_attributes=True)
+
+    patron_name: str = Field(min_length=1, max_length=255)
+    book_id: int = Field(gt=0)
     date: date
     notes: str
 

@@ -1,1 +1,10 @@
-__pycache___
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.db
+node_modules/
+dist/
+.env
+
+.local/
