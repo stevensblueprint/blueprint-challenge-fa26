@@ -4,6 +4,8 @@ import CheckoutForm from './components/CheckoutForm'
 import BookDetail from './components/BookDetail'
 import BookForm from './components/BookForm'
 import BookList from './components/BookList'
+//We need to add this
+import { listBooks, getBook, createBook, listBookCheckouts, createCheckout} from './api/api'
 import { GENRES, type Genre, type Checkout, type CheckoutFormValues, type Book, type BookFormValues } from './types'
 
 const initialBookForm: BookFormValues = {
@@ -32,48 +34,93 @@ function App() {
   const [checkoutForm, setCheckoutForm] = useState<CheckoutFormValues>(initialCheckoutForm)
   const [error, setError] = useState<string | null>(null)
 
+  // Loads the catalog using the current search text and genre filter.
   async function handleLoadBooks() {
     void search
     void genreFilter
     void setBooks
     // TODO: Implement book list loading using src/api/api.ts.
-    setError('TODO: implement handleLoadBooks in App.tsx')
+    // setError('TODO: implement handleLoadBooks in App.tsx')
+
+    //We will implement try catch for dealing will impelmenting our book list
+    try {
+      const result = await listBooks({q: search, genre: genreFilter})
+      setBooks(result)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load books')
+    }
   }
 
+  // Loads a book's details and its checkout history together (fetched concurrently).
   async function handleSelectBook(bookId: number) {
     void bookId
     void setSelectedBook
     void setBookCheckouts
     void setCheckoutForm
     // TODO: Implement selected book + checkouts fetch using src/api/api.ts.
-    setError('TODO: implement handleSelectBook in App.tsx')
+    // setError('TODO: implement handleSelectBook in App.tsx')
+
+    try{
+      const [book, checkouts] = await Promise.all([
+        getBook(bookId),
+        listBookCheckouts(bookId),
+      ])
+      setSelectedBook(book)
+      setBookCheckouts(checkouts)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error? err.message: 'Failed to load book details')
+    }
   }
 
+  // Stores the latest edited values from the book creation form.
   function handleBookFormChange(next: BookFormValues) {
     void next
     // TODO: Implement book form state handling.
-    setError('TODO: implement book form state updates in App.tsx')
+    // setError('TODO: implement book form state updates in App.tsx')
+    setBookForm(next)
   }
 
+  // Stores the latest edited values from the checkout creation form.
   function handleCheckoutFormChange(next: CheckoutFormValues) {
     void next
     // TODO: Implement checkout form state handling.
-    setError('TODO: implement checkout form state updates in App.tsx')
+    // setError('TODO: implement checkout form state updates in App.tsx')
+    setCheckoutForm(next)
   }
 
+  // Submits the book form, then appends the newly created book to the catalog in place.
   async function handleCreateBook() {
     void bookForm
     void setBookForm
     // TODO: Implement book creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateBook in App.tsx')
+    // setError('TODO: implement handleCreateBook in App.tsx')
+    try {
+      const created = await createBook(bookForm)
+      setBooks((prev) => [...prev, created ])
+      setBookForm(initialBookForm)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message: 'Failed to create book')
+    }
   }
 
+  // Submits the checkout form, then appends the new checkout to the selected book's history.
   async function handleCreateCheckout() {
     void checkoutForm
     void selectedBook
     void setCheckoutForm
     // TODO: Implement checkout creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateCheckout in App.tsx')
+    //setError('TODO: implement handleCreateCheckout in App.tsx')
+    try {
+      const created = await createCheckout(checkoutForm)
+      setBookCheckouts((prev) => [...prev, created])
+      setCheckoutForm(initialCheckoutForm)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message: 'Failed to create checkout')
+    }
   }
 
   return (
