@@ -14,9 +14,19 @@
 }
 
 .form,
+.form-grid,
 .filters {
   display: grid;
   gap: 0.6rem;
+}
+
+.form-grid {
+  margin-bottom: 0.9rem;
+}
+
+.form-grid label,
+.filters label {
+  font-weight: 600;
 }
 
 .list {
@@ -33,15 +43,32 @@
   padding: 0.6rem;
 }
 
-.list button {
-  width: 100%;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
+.list-item {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  padding: 0;
+  gap: 0.5rem 1rem;
+}
+
+.list-item p {
+  margin: 0;
+}
+
+.list-item button {
+  flex: none;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  font-size: 0.85rem;
+}
+
+strong + .tag {
+  margin-left: 0.5rem;
 }
 
 input,
@@ -62,11 +89,45 @@ button {
   background: #0f172a;
   color: #fff;
   border-color: #0f172a;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .error {
   color: #b91c1c;
   font-weight: 600;
+}
+
+.empty {
+  margin: 0.75rem 0 0;
+  color: #475569;
+}
+
+.form-problems {
+  margin: 0 0 0.9rem;
+  padding-left: 1.2rem;
+  color: #b91c1c;
+}
+
+.form-feedback {
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.form-feedback.saving {
+  color: #475569;
+}
+
+.form-feedback.success {
+  color: #166534;
+}
+
+.form-feedback.error {
+  color: #b91c1c;
 }
 
 .detail p {

@@ -8,6 +8,7 @@ type BookListProps = {
   onGenreChange: (next: Genre | 'All') => void
   onSelectBook: (id: number) => void
   genres: Genre[]
+  loading?: boolean
 }
 
 function BookList({
@@ -18,7 +19,16 @@ function BookList({
   onGenreChange,
   onSelectBook,
   genres,
+  loading = false,
 }: BookListProps) {
+  // What to say when the list is empty: still loading, nothing matches, or no books at all.
+  let emptyMessage = 'No books in the catalog yet. Add one with the Create Book form.'
+  if (loading) {
+    emptyMessage = 'Loading books...'
+  } else if (search.trim() || genreFilter !== 'All') {
+    emptyMessage = 'No books match your search or genre filter.'
+  }
+
   return (
     <section className="card">
       <h2>Books</h2>
@@ -47,7 +57,7 @@ function BookList({
         </select>
       </div>
 
-      {/* TODO: Add empty-state messaging when no books match the current search/filter. */}
+      {books.length === 0 ? <p className="empty">{emptyMessage}</p> : null}
       <ul className="list">
         {books.map((book) => (
           <li key={book.id} className="list-item">

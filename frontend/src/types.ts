@@ -34,4 +34,10 @@ export type CheckoutFormValues = {
   notes: string
 }
 
-export const GENRES: Genre[] = ['Fiction', 'Non-Fiction', 'Children', 'Reference', 'Periodical', 'Other']
+// What a form shows under its submit button: saving, saved, or what went wrong.
+export type FormFeedback = {
+  kind: 'saving' | 'success' | 'error'
+  message: string
+}
+
+export const GENRES: Genre[] =['Fiction', 'Non-Fiction', 'Children', 'Reference', 'Periodical', 'Other']
