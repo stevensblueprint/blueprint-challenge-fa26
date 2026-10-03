@@ -8,6 +8,7 @@ type BookListProps = {
   onGenreChange: (next: Genre | 'All') => void
   onSelectBook: (id: number) => void
   genres: Genre[]
+  loading?: boolean
 }
 
 function BookList({
@@ -18,7 +19,10 @@ function BookList({
   onGenreChange,
   onSelectBook,
   genres,
+  loading = false,
 }: BookListProps) {
+  const filtersActive = search.trim() !== '' || genreFilter !== 'All'
+
   return (
     <section className="card">
       <h2>Books</h2>
@@ -47,15 +51,24 @@ function BookList({
         </select>
       </div>
 
-      {/* TODO: Add empty-state messaging when no books match the current search/filter. */}
+      {loading ? <p className="muted">Loading books…</p> : null}
+      {!loading && books.length === 0 ? (
+        <p className="muted empty-state">
+          {filtersActive
+            ? 'No books match your search or genre. Try a different title or choose "All".'
+            : 'No books in the catalog yet. Add one with the Create Book form.'}
+        </p>
+      ) : null}
       <ul className="list">
         {books.map((book) => (
           <li key={book.id} className="list-item">
-            <div>
+            <div className="list-item-text">
               <strong>{book.title}</strong>
               <span className="tag">{book.genre}</span>
             </div>
-            <button onClick={() => onSelectBook(book.id)}>View Details</button>
+            <button type="button" className="secondary" onClick={() => onSelectBook(book.id)}>
+              View Details
+            </button>
           </li>
         ))}
       </ul>

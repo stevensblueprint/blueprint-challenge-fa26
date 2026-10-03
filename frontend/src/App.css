@@ -72,3 +72,95 @@ button {
 .detail p {
   margin: 0.45rem 0;
 }
+
+/* new style code below because button text on frontend wasn't showing up*/
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.list-item-text {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.list button.secondary {
+  width: auto;
+  flex-shrink: 0;
+  background: #fff;
+  color: #1d4ed8;
+  border: 1px solid #1d4ed8;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.list button.secondary:hover {
+  background: #eff6ff;
+}
+
+/* Genre and date tags */
+.tag {
+  display: inline-block;
+  background: #eef2f7;
+  color: #374151;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* extra css stuff */
+.form-grid {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.form-grid label {
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.success {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.muted {
+  color: #64748b;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.3rem 1rem;
+}
+
+.details dt {
+  font-weight: 600;
+}
+
+.details dd {
+  margin: 0;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

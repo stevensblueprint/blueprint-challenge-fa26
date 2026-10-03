@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from datetime import date
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class BookGenre(str, enum.Enum):
@@ -29,7 +29,8 @@ class BookResponse(BookCreate):
 
 
 class CheckoutCreate(BaseModel):
-    patron_name: str
+    # Matches the String(255) column, so an over-long name is a 422 instead of a DB error.
+    patron_name: str = Field(max_length=255)
     book_id: int
     date: date
     notes: str

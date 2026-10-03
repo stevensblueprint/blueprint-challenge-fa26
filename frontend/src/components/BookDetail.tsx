@@ -21,7 +21,7 @@ function BookDetail({ book, checkouts }: BookDetailProps) {
       <p className="tag">{book.genre}</p>
       <p>{book.description}</p>
 
-      <dl>
+      <dl className="details">
         <dt>Author</dt>
         <dd>{book.author}</dd>
         <dt>Publisher Email</dt>
@@ -31,10 +31,11 @@ function BookDetail({ book, checkouts }: BookDetailProps) {
       </dl>
 
       <h3>Checkouts</h3>
+      {checkouts.length === 0 ? <p className="muted">No checkouts recorded for this book yet.</p> : null}
       <ul className="list">
         {checkouts.map((checkout) => (
           <li key={checkout.id} className="list-item">
-            <div>
+            <div className="list-item-text">
               <strong>{checkout.patron_name}</strong>
               <span className="tag">{checkout.date}</span>
             </div>
