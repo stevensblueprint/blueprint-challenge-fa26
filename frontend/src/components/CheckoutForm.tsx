@@ -5,12 +5,25 @@ type CheckoutFormProps = {
   books: Book[]
   onChange: (next: CheckoutFormValues) => void
   onSubmit: () => void
+  submitting?: boolean
+  success?: boolean
 }
 
-function CheckoutForm({ values, books, onChange, onSubmit }: CheckoutFormProps) {
-  // TODO: Add validation for required fields before submit.
+function CheckoutForm({ values, books, onChange, onSubmit, submitting=false, success=false }: CheckoutFormProps) {
   function update<K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) {
     onChange({ ...values, [key]: value })
+  }
+
+  function handleSubmit() {
+    if (
+      !values.patron_name.trim() ||
+      !values.book_id ||
+      !values.date
+    ) {
+      return
+    }
+
+    onSubmit()
   }
 
   return (
@@ -18,7 +31,6 @@ function CheckoutForm({ values, books, onChange, onSubmit }: CheckoutFormProps) 
       <h2>Create Checkout</h2>
 
       <div className="form-grid">
-        {/* TODO: Prefill selected book context when opened from book details. */}
         <label htmlFor="checkout-patron-name">Patron Name</label>
         <input
           id="checkout-patron-name"
@@ -56,8 +68,11 @@ function CheckoutForm({ values, books, onChange, onSubmit }: CheckoutFormProps) 
         />
       </div>
 
-      <button onClick={onSubmit}>Create Checkout</button>
-      {/* TODO: Show submit state and confirmation after successful creation. */}
+      <button onClick={handleSubmit} disabled={submitting}>
+        {submitting ? 'Creating...' : 'Create Checkout'}
+      </button>
+
+      {success ? <p>Checkout created successfully!</p> : null}
     </section>
   )
 }

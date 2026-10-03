@@ -5,12 +5,27 @@ type BookFormProps = {
   genres: Genre[]
   onChange: (next: BookFormValues) => void
   onSubmit: () => void
+  submitting?: boolean
+  success?: boolean
 }
 
-function BookForm({ values, genres, onChange, onSubmit }: BookFormProps) {
-  // TODO: Add validation for required fields before submit.
+function BookForm({ values, genres, onChange, onSubmit, submitting=false, success=false }: BookFormProps) {
   function update<K extends keyof BookFormValues>(key: K, value: BookFormValues[K]) {
     onChange({ ...values, [key]: value })
+  }
+
+  function handleSubmit() {
+    if (
+      !values.title.trim() ||
+      !values.description.trim() ||
+      !values.author.trim() ||
+      !values.publisher_email.trim() ||
+      !values.shelf_location.trim()
+    ) {
+      return
+    }
+
+    onSubmit()
   }
 
   return (
@@ -68,8 +83,11 @@ function BookForm({ values, genres, onChange, onSubmit }: BookFormProps) {
         />
       </div>
 
-      <button onClick={onSubmit}>Create Book</button>
-      {/* TODO: Show submit state and confirmation after successful creation. */}
+      <button onClick={handleSubmit} disabled={submitting}>
+        {submitting ? 'Creating...' : 'Create Book'}
+      </button>
+
+      {success ? <p>Book created successfully!</p> : null}
     </section>
   )
 }

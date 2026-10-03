@@ -5,6 +5,7 @@ import BookDetail from './components/BookDetail'
 import BookForm from './components/BookForm'
 import BookList from './components/BookList'
 import { GENRES, type Genre, type Checkout, type CheckoutFormValues, type Book, type BookFormValues } from './types'
+import { listBooks, getBook, createBook, listBookCheckouts, createCheckout, } from './api/api'
 
 const initialBookForm: BookFormValues = {
   title: '',
@@ -31,49 +32,94 @@ function App() {
   const [bookForm, setBookForm] = useState<BookFormValues>(initialBookForm)
   const [checkoutForm, setCheckoutForm] = useState<CheckoutFormValues>(initialCheckoutForm)
   const [error, setError] = useState<string | null>(null)
+  const [bookSubmitting, setBookSubmitting] = useState(false)
+  const [bookSuccess, setBookSuccess] = useState(false)
+  const [checkoutSubmitting, setCheckoutSubmitting] = useState(false)
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false)
 
   async function handleLoadBooks() {
-    void search
-    void genreFilter
-    void setBooks
-    // TODO: Implement book list loading using src/api/api.ts.
-    setError('TODO: implement handleLoadBooks in App.tsx')
+    try {
+      setError(null)
+
+      const loadedBooks = await listBooks({
+        q: search,
+        genre: genreFilter,
+      })
+
+      setBooks(loadedBooks)
+    } catch {
+      setError('Failed to load books')
+    }
   }
 
   async function handleSelectBook(bookId: number) {
-    void bookId
-    void setSelectedBook
-    void setBookCheckouts
-    void setCheckoutForm
-    // TODO: Implement selected book + checkouts fetch using src/api/api.ts.
-    setError('TODO: implement handleSelectBook in App.tsx')
+    try {
+      setError(null)
+
+      const book = await getBook(bookId)
+      const checkouts = await listBookCheckouts(bookId)
+
+      setSelectedBook(book)
+      setBookCheckouts(checkouts)
+      setCheckoutForm({
+        ...initialCheckoutForm,
+        book_id: String(bookId),
+      })
+    } catch {
+      setError('Failed to load book details')
+    }
   }
 
   function handleBookFormChange(next: BookFormValues) {
-    void next
-    // TODO: Implement book form state handling.
-    setError('TODO: implement book form state updates in App.tsx')
+    setBookForm(next)
   }
 
   function handleCheckoutFormChange(next: CheckoutFormValues) {
-    void next
-    // TODO: Implement checkout form state handling.
-    setError('TODO: implement checkout form state updates in App.tsx')
+    setCheckoutForm(next)
   }
 
   async function handleCreateBook() {
-    void bookForm
-    void setBookForm
-    // TODO: Implement book creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateBook in App.tsx')
+    try {
+      setError(null)
+      setBookSubmitting(true)
+      setBookSuccess(false)
+
+      const newBook = await createBook(bookForm)
+
+      setBooks((currentBooks) => [...currentBooks, newBook])
+      setBookForm(initialBookForm)
+      setBookSuccess(true)
+    } catch {
+      setError('Failed to create book')
+    } finally {
+      setBookSubmitting(false)
+    }
   }
 
   async function handleCreateCheckout() {
-    void checkoutForm
-    void selectedBook
-    void setCheckoutForm
-    // TODO: Implement checkout creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateCheckout in App.tsx')
+    try {
+      setError(null)
+      setCheckoutSubmitting(true)
+      setCheckoutSuccess(false)
+
+      const newCheckout = await createCheckout(checkoutForm)
+
+      setBookCheckouts((currentCheckouts) => [
+        ...currentCheckouts,
+        newCheckout,
+      ])
+
+      setCheckoutForm({
+        ...initialCheckoutForm,
+        book_id: selectedBook ? String(selectedBook.id) : '',
+      })
+
+      setCheckoutSuccess(true)
+    } catch {
+      setError('Failed to create checkout')
+    } finally {
+      setCheckoutSubmitting(false)
+    }
   }
 
   return (
@@ -108,6 +154,8 @@ function App() {
         genres={GENRES}
         onChange={handleBookFormChange}
         onSubmit={() => void handleCreateBook()}
+        submitting={bookSubmitting}
+        success={bookSuccess}
       />
 
       <BookDetail book={selectedBook} checkouts={bookCheckouts} />
@@ -117,6 +165,8 @@ function App() {
         books={books}
         onChange={handleCheckoutFormChange}
         onSubmit={() => void handleCreateCheckout()}
+        submitting={checkoutSubmitting}
+        success={checkoutSuccess}
       />
     </main>
   )
