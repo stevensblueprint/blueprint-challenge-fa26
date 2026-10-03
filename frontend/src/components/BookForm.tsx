@@ -8,7 +8,17 @@ type BookFormProps = {
 }
 
 function BookForm({ values, genres, onChange, onSubmit }: BookFormProps) {
-  // TODO: Add validation for required fields before submit.
+  // validation for required fields before submit.
+  function handleSubmit() {
+    // genre already has a default value, so not required
+    const requiredFields = [values.title, values.description, values.author, values.publisher_email, values.shelf_location]
+    if (requiredFields.some((field) => field.trim() === '')) {
+      alert('Please fill in all required fields.')
+      return
+    }
+    onSubmit()
+  }
+
   function update<K extends keyof BookFormValues>(key: K, value: BookFormValues[K]) {
     onChange({ ...values, [key]: value })
   }
@@ -68,8 +78,11 @@ function BookForm({ values, genres, onChange, onSubmit }: BookFormProps) {
         />
       </div>
 
-      <button onClick={onSubmit}>Create Book</button>
-      {/* TODO: Show submit state and confirmation after successful creation. */}
+      <button onClick={handleSubmit}>Create Book</button>
+      {/* TODO: Show submit state and confirmation after successful creation. 
+      Notes: Form submission and successful-creation handling are managed by
+      App.tsx, where the API request and resulting application state are
+      directly handled. */}
     </section>
   )
 }

@@ -5,6 +5,7 @@ import BookDetail from './components/BookDetail'
 import BookForm from './components/BookForm'
 import BookList from './components/BookList'
 import { GENRES, type Genre, type Checkout, type CheckoutFormValues, type Book, type BookFormValues } from './types'
+import { listBooks, getBook, createBook, listBookCheckouts, createCheckout } from './api/api'
 
 const initialBookForm: BookFormValues = {
   title: '',
@@ -33,64 +34,99 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   async function handleLoadBooks() {
-    void search
-    void genreFilter
-    void setBooks
-    // TODO: Implement book list loading using src/api/api.ts.
-    setError('TODO: implement handleLoadBooks in App.tsx')
+    // loading book list using src/api/api.ts.
+    try {
+      setError(null) // clear old errors
+      const loadedBooks = await listBooks({ q: search, genre: genreFilter})
+      setBooks(loadedBooks)
+    }
+    
+    catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load books')
+    }
   }
 
   async function handleSelectBook(bookId: number) {
-    void bookId
-    void setSelectedBook
-    void setBookCheckouts
-    void setCheckoutForm
-    // TODO: Implement selected book + checkouts fetch using src/api/api.ts.
-    setError('TODO: implement handleSelectBook in App.tsx')
+    // selected book + checkouts fetch using src/api/api.ts.
+    try {
+      setError(null) // clear old errors
+      const [book, checkouts] = await Promise.all([
+        getBook(bookId),
+        listBookCheckouts(bookId),
+      ])
+      setSelectedBook(book)
+      setBookCheckouts(checkouts)
+      setCheckoutForm((curr) => ({ ...curr, book_id: String(bookId) }))
+    }
+
+    catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load book details')
+    }
   }
 
   function handleBookFormChange(next: BookFormValues) {
-    void next
-    // TODO: Implement book form state handling.
-    setError('TODO: implement book form state updates in App.tsx')
+    // book form state handling.
+    setBookForm(next)
+    setError(null)
   }
 
   function handleCheckoutFormChange(next: CheckoutFormValues) {
-    void next
-    // TODO: Implement checkout form state handling.
-    setError('TODO: implement checkout form state updates in App.tsx')
+    // Implement checkout form state handling.
+    setCheckoutForm(next)
+    setError(null)
   }
 
   async function handleCreateBook() {
-    void bookForm
-    void setBookForm
-    // TODO: Implement book creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateBook in App.tsx')
+    // book creation flow using src/api/api.ts.
+    try {
+      setError(null)
+      const book = await createBook(bookForm)
+      setBooks((curr) => [...curr, book])
+      setBookForm(initialBookForm)
+      alert(`Book created successfully! ID: ${book.id}, Title: ${book.title}`)
+    }
+
+    catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to create book')
+    }
   }
 
   async function handleCreateCheckout() {
-    void checkoutForm
-    void selectedBook
-    void setCheckoutForm
-    // TODO: Implement checkout creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateCheckout in App.tsx')
+    // checkout creation flow using src/api/api.ts.
+    try {
+      setError(null)
+
+      if(!selectedBook) {
+        setError('Select a book before creating a checkout.')
+        return
+      }
+
+      const checkout = await createCheckout(checkoutForm)
+      setBookCheckouts((curr) => [...curr, checkout])
+      alert(`Checkout created successfully! ID: ${checkout.id}, Book: ${selectedBook?.title}`)
+      setCheckoutForm((curr) => ({ ...initialCheckoutForm, book_id: curr.book_id }))
+    }
+
+    catch (e) {
+      setError(e instanceof Error ? e.message: 'Failed to create checkout')
+    }
   }
 
   return (
     <main className="layout">
       <header>
         <h1>LibraryConnect Resource Hub</h1>
-        <p>Starter frontend scaffold with TODOs for API integration.</p>
+        <p>Manage books, browse the library catalog, and track checkouts</p>
       </header>
 
       {error ? <p className="error">{error}</p> : null}
 
       <section className="card">
-        <h2>Integration TODO</h2>
+        <h2>Browse Books</h2>
         <p>
-          Route handlers, form wiring, and API calls are intentionally left as TODOs for the team.
+          Load the library catalog to browse available books.
         </p>
-        <button onClick={() => void handleLoadBooks()}>Load Books (TODO API)</button>
+        <button onClick={() => void handleLoadBooks()}>Load Books</button>
       </section>
 
       <BookList

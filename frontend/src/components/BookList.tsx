@@ -47,18 +47,21 @@ function BookList({
         </select>
       </div>
 
-      {/* TODO: Add empty-state messaging when no books match the current search/filter. */}
-      <ul className="list">
-        {books.map((book) => (
-          <li key={book.id} className="list-item">
-            <div>
-              <strong>{book.title}</strong>
-              <span className="tag">{book.genre}</span>
-            </div>
-            <button onClick={() => onSelectBook(book.id)}>View Details</button>
-          </li>
-        ))}
-      </ul>
+      { books.length === 0 ? (
+        <p>No books match your search or filter.</p>
+      ) : (
+        <ul className="list">
+          {books.map((book) => (
+            <li key={book.id} className="list-item">
+              <div>
+                <strong>{book.title}</strong>
+                <span className="tag">{book.genre}</span>
+              </div>
+              <button onClick={() => onSelectBook(book.id)}>View Details</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

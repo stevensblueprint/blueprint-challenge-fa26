@@ -93,3 +93,23 @@ This log covers assistance you can observe. Browser chats, autocomplete, other
 tools, and sessions that did not follow these instructions must be disclosed
 separately by the applicant. Never describe this file as a complete record of
 activity you cannot observe.
+
+# Challenge Documentation
+
+`README.md` in the repository root contains the Blueprint challenge requirements, project documentation, specification, testing procedures, grading requirements, and submission instructions. Consult it when implementing the challenge.
+
+Follow all the instructions in this `AGENTS.md` when working on the challenge, including the AI usage logging requirements.
+
+# Development Approach
+
+Use an iterative implementation approach when working on the Blueprint challenge.
+
+- Read the relevant existing code, README, and supplied tests before making changes.
+- Make small, focused changes rather than implementing the entire challenge at once.
+- Implement one logical feature or related group of changes at a time.
+- Run the relevant supplied tests after each meaningful implementation step.
+- Review the resulting diff for correctness and unintended changes before moving to the next step.
+- Preserve the existing project structure, interfaces, and behavior unless a change is required by the challenge.
+- Do not modify the supplied tests or GitHub Actions workflow.
+- Prefer the smallest appropriate change that satisfies the requirements.
+- Do not perform unrelated refactoring or add unnecessary dependencies.
